@@ -6,187 +6,108 @@ import { FilmPass } from 'three/addons/postprocessing/FilmPass.js';
 
 // --- CONFIGURATION ---
 const CONFIG = {
-    bgColor: 0x000000,
-    wireframeColor: 0x00ff41, // Green
-    distortionStrength: 1.0,
-    mouseSensitivity: 0.5
+    bgColor: 0x050505,
+    primaryColor: 0x00ff2a, // Green
+    accentColor: 0xffcc00, // Gold
+    distortionStrength: 0.5,
+    mouseSensitivity: 0.2
 };
 
 // --- SCENE SETUP ---
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(CONFIG.bgColor);
-// Add some fog to fade out distant grid lines
-scene.fog = new THREE.Fog(CONFIG.bgColor, 10, 50);
+scene.fog = new THREE.Fog(CONFIG.bgColor, 20, 100);
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 15;
+camera.position.z = 12;
 
-const renderer = new THREE.WebGLRenderer({ antialias: false }); // Disable AA for raw look
+const renderer = new THREE.WebGLRenderer({ antialias: true }); // Better quality for Imperial look
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.getElementById('canvas-container').appendChild(renderer.domElement);
 
 
-// --- THE ARTIFACT (Custom Shader Material) ---
-// We'll use a TorusKnot but deform it heavily in the vertex shader
+// --- THE ARTIFACT: IMPERIAL CORE ---
+// A complex nested geometry representing the "Digital Chakra" / Control Core.
 
-const vertexShader = `
-    uniform float time;
-    uniform float noiseStrength;
-    varying vec2 vUv;
-    varying vec3 vNormal;
+const coreGroup = new THREE.Group();
+scene.add(coreGroup);
 
-    // Simplex Noise (simplified)
-    vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-    vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-    vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
-    vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-    float snoise(vec3 v) {
-        const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
-        const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
-
-        vec3 i  = floor(v + dot(v, C.yyy) );
-        vec3 x0 = v - i + dot(i, C.xxx) ;
-
-        vec3 g = step(x0.yzx, x0.xyz);
-        vec3 l = 1.0 - g;
-        vec3 i1 = min( g.xyz, l.zxy );
-        vec3 i2 = max( g.xyz, l.zxy );
-
-        vec3 x1 = x0 - i1 + C.xxx;
-        vec3 x2 = x0 - i2 + C.yyy;
-        vec3 x3 = x0 - D.yyy;
-
-        i = mod289(i);
-        vec4 p = permute( permute( permute(
-             i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
-           + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
-           + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
-
-        float n_ = 0.142857142857;
-        vec3  ns = n_ * D.wyz - D.xzx;
-
-        vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-
-        vec4 x_ = floor(j * ns.z);
-        vec4 y_ = floor(j - 7.0 * x_ );
-
-        vec4 x = x_ *ns.x + ns.yyyy;
-        vec4 y = y_ *ns.x + ns.yyyy;
-        vec4 h = 1.0 - abs(x) - abs(y);
-
-        vec4 b0 = vec4( x.xy, y.xy );
-        vec4 b1 = vec4( x.zw, y.zw );
-
-        vec4 s0 = floor(b0)*2.0 + 1.0;
-        vec4 s1 = floor(b1)*2.0 + 1.0;
-        vec4 sh = -step(h, vec4(0.0));
-
-        vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
-        vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
-
-        vec3 p0 = vec3(a0.xy,h.x);
-        vec3 p1 = vec3(a0.zw,h.y);
-        vec3 p2 = vec3(a1.xy,h.z);
-        vec3 p3 = vec3(a1.zw,h.w);
-
-        vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
-        p0 *= norm.x;
-        p1 *= norm.y;
-        p2 *= norm.z;
-        p3 *= norm.w;
-
-        vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-        m = m * m;
-        return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1),
-                                      dot(p2,x2), dot(p3,x3) ) );
-    }
-
-    void main() {
-        vUv = uv;
-        vNormal = normal;
-
-        // Spike effect
-        float noiseVal = snoise(position + time * 0.5);
-        vec3 newPos = position + normal * noiseVal * noiseStrength;
-
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
-    }
-`;
-
-const fragmentShader = `
-    uniform float time;
-    varying vec2 vUv;
-    varying vec3 vNormal;
-
-    void main() {
-        // Simple wireframe-ish glow
-        float scanline = sin(vUv.y * 100.0 + time * 5.0) * 0.5 + 0.5;
-
-        // Discard some pixels for a "decay" look
-        if (mod(gl_FragCoord.x, 4.0) < 1.0) discard;
-        if (mod(gl_FragCoord.y, 4.0) < 1.0) discard;
-
-        gl_FragColor = vec4(0.0, 1.0, 0.25, 1.0); // Hacker Green
-        gl_FragColor.rgb *= scanline + 0.5;
-    }
-`;
-
-const artifactMaterial = new THREE.ShaderMaterial({
-    uniforms: {
-        time: { value: 0 },
-        noiseStrength: { value: 1.0 }
-    },
-    vertexShader: vertexShader,
-    fragmentShader: fragmentShader,
-    wireframe: true,
-    transparent: true,
-    side: THREE.DoubleSide
+// 1. Central Emperor Sphere (Solid, Gold)
+const sphereGeo = new THREE.IcosahedronGeometry(2, 4); // High detail
+const sphereMat = new THREE.MeshStandardMaterial({
+    color: CONFIG.accentColor,
+    metalness: 0.9,
+    roughness: 0.1,
+    emissive: 0xaa4400,
+    emissiveIntensity: 0.2
 });
+const centralCore = new THREE.Mesh(sphereGeo, sphereMat);
+coreGroup.add(centralCore);
 
-const artifactGeometry = new THREE.TorusKnotGeometry(4, 1.2, 128, 32);
-const artifact = new THREE.Mesh(artifactGeometry, artifactMaterial);
-scene.add(artifact);
+// 2. Inner Rotating Rings (Green Wireframe - The Surveillance Network)
+const ringGeo1 = new THREE.TorusGeometry(3.5, 0.05, 16, 100);
+const ringMat1 = new THREE.MeshBasicMaterial({ color: CONFIG.primaryColor, wireframe: true, transparent: true, opacity: 0.6 });
+const innerRing = new THREE.Mesh(ringGeo1, ringMat1);
+coreGroup.add(innerRing);
 
-// --- CYBER-HEART (Inner Core) ---
-const heartGeometry = new THREE.IcosahedronGeometry(2, 2);
-const heartMaterial = new THREE.MeshStandardMaterial({
-    color: 0xff0000,
-    emissive: 0xff0000,
-    emissiveIntensity: 5.0,
-    roughness: 0.2,
+// 3. Outer Rotating Rings (Thicker, Gold - The Dominion)
+const ringGeo2 = new THREE.TorusGeometry(5.0, 0.1, 16, 100);
+const ringMat2 = new THREE.MeshStandardMaterial({
+    color: CONFIG.accentColor,
     metalness: 1.0,
-    wireframe: false
+    roughness: 0.2
 });
-const heart = new THREE.Mesh(heartGeometry, heartMaterial);
-artifact.add(heart);
+const outerRing = new THREE.Mesh(ringGeo2, ringMat2);
+coreGroup.add(outerRing);
 
-// Inner Light
-const heartLight = new THREE.PointLight(0xff0000, 10, 20);
-heart.add(heartLight);
+// 4. Orbital Satellites (Floating cubes)
+const satGeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+const satMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+const satellites = [];
+
+for(let i=0; i<8; i++) {
+    const sat = new THREE.Mesh(satGeo, satMat);
+    const angle = (i / 8) * Math.PI * 2;
+    sat.position.set(Math.cos(angle) * 7, Math.sin(angle) * 7, 0);
+    sat.userData = { angle: angle, speed: 0.5 + Math.random() * 0.5, radius: 7 };
+    coreGroup.add(sat);
+    satellites.push(sat);
+}
 
 
-// Background Grid (Retro Style)
-const gridHelper = new THREE.GridHelper(100, 50, 0x111111, 0x111111);
+// LIGHTING
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+scene.add(ambientLight);
+
+const pointLight = new THREE.PointLight(CONFIG.accentColor, 5, 50);
+pointLight.position.set(5, 5, 10);
+scene.add(pointLight);
+
+const coreLight = new THREE.PointLight(0xff0000, 2, 20);
+coreGroup.add(coreLight); // Light emanating from core
+
+
+// BACKGROUND GRID (Floor)
+const gridHelper = new THREE.GridHelper(200, 50, 0x111111, 0x0a0a0a);
 gridHelper.position.y = -10;
 scene.add(gridHelper);
 
 
-// --- POST PROCESSING (The Hacked Broadcast) ---
+// --- POST PROCESSING ---
 const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
 
-// 1. Film Pass (Static/Grain)
-const filmPass = new FilmPass(0.8, 0.2, 512, false);
+// 1. Film Pass (Surveillance Grain - Cleaner than Glitch)
+const filmPass = new FilmPass(0.35, 0.025, 648, false);
 composer.addPass(filmPass);
 
-// 2. Custom "Digital Glitch" Shader
-const GlitchShader = {
+// 2. Custom "Surveillance" Shader (Subtle chromatic aberration, night vision tint)
+const SurveillanceShader = {
     uniforms: {
         "tDiffuse": { value: null },
         "time": { value: 0.0 },
-        "uMouseSpeed": { value: 0.0 }, // 0 to 1
         "resolution": { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
     },
     vertexShader: `
@@ -199,64 +120,43 @@ const GlitchShader = {
     fragmentShader: `
         uniform sampler2D tDiffuse;
         uniform float time;
-        uniform float uMouseSpeed;
         uniform vec2 resolution;
         varying vec2 vUv;
-
-        float random(vec2 st) {
-            return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
-        }
 
         void main() {
             vec2 uv = vUv;
 
-            // RGB Shift (Chromatic Aberration) based on mouse speed
-            float shiftStrength = 0.005 + uMouseSpeed * 0.05;
+            // Subtle Lens Distortion
+            vec2 dist = uv - 0.5;
+            float r2 = dot(dist, dist);
+            uv += dist * (r2 * 0.05); // Mild fisheye
 
-            // Jitter shift
-            if (random(vec2(time, uv.y)) > 0.95) {
-                shiftStrength += 0.02; // Random glitch spikes
-            }
-
-            vec4 r = texture2D(tDiffuse, uv + vec2(shiftStrength, 0.0));
+            // Chromatic Aberration (Static)
+            float shift = 0.002;
+            vec4 r = texture2D(tDiffuse, uv + vec2(shift, 0.0));
             vec4 g = texture2D(tDiffuse, uv);
-            vec4 b = texture2D(tDiffuse, uv - vec2(shiftStrength, 0.0));
+            vec4 b = texture2D(tDiffuse, uv - vec2(shift, 0.0));
 
-            vec4 color = vec4(r.r, g.g, b.b, 1.0);
+            vec3 color = vec3(r.r, g.g, b.b);
 
-            // Scanline displacement (Tearing)
-            float tear = 0.0;
-            if (sin(uv.y * 10.0 + time * 10.0) > 0.9 + (1.0 - uMouseSpeed)*0.1) {
-                tear = (random(vec2(uv.y, time)) - 0.5) * 0.5 * uMouseSpeed;
-            }
-            vec4 tearColor = texture2D(tDiffuse, uv + vec2(tear, 0.0));
-            if (tear != 0.0) {
-                 color = tearColor; // Replace with torn pixels
-                 color.rgb += 0.1; // Brighten tear
-            }
+            // Night Vision Green Tint
+            color *= vec3(0.8, 1.1, 0.9);
 
-            // Scanlines (Dark bands)
-            float scanline = sin(uv.y * resolution.y * 0.5);
-            color.rgb -= abs(scanline) * 0.1;
+            // Scanlines
+            float scan = sin(uv.y * 800.0 + time * 2.0) * 0.05;
+            color -= scan;
 
-            gl_FragColor = color;
+            // Vignette
+            float vig = 1.0 - smoothstep(0.4, 1.2, length(vUv - 0.5) * 1.5);
+            color *= vig;
+
+            gl_FragColor = vec4(color, 1.0);
         }
     `
 };
 
-const glitchPass = new ShaderPass(GlitchShader);
-composer.addPass(glitchPass);
-
-
-// --- INTERACTION ---
-let mouseVelocity = 0;
-const mouse = new THREE.Vector2();
-const prevMouse = new THREE.Vector2();
-
-window.addEventListener('mousemove', (e) => {
-    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-});
+const surveillancePass = new ShaderPass(SurveillanceShader);
+composer.addPass(surveillancePass);
 
 
 // --- ANIMATION LOOP ---
@@ -265,31 +165,32 @@ const clock = new THREE.Clock();
 function animate() {
     requestAnimationFrame(animate);
     const elapsedTime = clock.getElapsedTime();
-    const deltaTime = clock.getDelta(); // This resets delta, careful using it with elapsedTime
 
-    // Update Artifact
-    artifactMaterial.uniforms.time.value = elapsedTime;
+    // 1. Rotate the Whole Group
+    coreGroup.rotation.y = elapsedTime * 0.1;
 
-    // Calculate Mouse Speed (Instantaneous)
-    const dist = mouse.distanceTo(prevMouse);
-    // Decay velocity
-    mouseVelocity += (dist * 20.0 - mouseVelocity) * 0.1;
-    prevMouse.copy(mouse);
+    // 2. Animate Rings (Opposite directions for complexity)
+    innerRing.rotation.x = elapsedTime * 0.5;
+    innerRing.rotation.y = elapsedTime * 0.2;
 
-    // Artifact reacts to mouse speed (spikes more)
-    artifactMaterial.uniforms.noiseStrength.value = 1.0 + mouseVelocity * 5.0;
+    outerRing.rotation.x = -elapsedTime * 0.3;
+    outerRing.rotation.z = elapsedTime * 0.1;
 
-    // Rotate Artifact
-    artifact.rotation.x = elapsedTime * 0.2;
-    artifact.rotation.y = elapsedTime * 0.5 + mouse.x * 0.5;
+    // 3. Pulse Core
+    const pulse = 1.0 + Math.sin(elapsedTime * 2.0) * 0.05;
+    centralCore.scale.set(pulse, pulse, pulse);
 
-    // Pulse Heart
-    const heartbeat = 1.0 + Math.pow(Math.sin(elapsedTime * 4.0), 63.0) * 0.3; // Sharp beat
-    heart.scale.set(heartbeat, heartbeat, heartbeat);
+    // 4. Animate Satellites
+    satellites.forEach(sat => {
+        sat.userData.angle += sat.userData.speed * 0.02;
+        sat.position.x = Math.cos(sat.userData.angle) * sat.userData.radius;
+        sat.position.z = Math.sin(sat.userData.angle) * sat.userData.radius;
+        sat.rotation.x += 0.05;
+        sat.rotation.y += 0.05;
+    });
 
     // Update Post Processing
-    glitchPass.uniforms.time.value = elapsedTime;
-    glitchPass.uniforms.uMouseSpeed.value = Math.min(mouseVelocity, 1.0); // Cap at 1
+    surveillancePass.uniforms.time.value = elapsedTime;
 
     composer.render();
 }
@@ -299,24 +200,27 @@ window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    glitchPass.uniforms.resolution.value.set(window.innerWidth, window.innerHeight);
+    surveillancePass.uniforms.resolution.value.set(window.innerWidth, window.innerHeight);
     composer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// --- UI TEXT SCRAMBLE LOGIC ---
+
+// --- UI LOGIC (Text Scramble & Windows) ---
+// Note: We need to match the new Data Attributes from index.html
+
+// Scramble Effect
 class TextScramble {
     constructor(el) {
         this.el = el;
-        this.chars = '!<>-_\\/[]{}—=+*^?#________';
+        this.chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         this.originalText = el.innerText;
         this.frameRequest = null;
         this.frame = 0;
         this.queue = [];
         this.update = this.update.bind(this);
 
-        // Listeners
-        this.el.addEventListener('mouseenter', () => {
-            this.setText(this.el.getAttribute('data-original') || this.originalText);
+        el.addEventListener('mouseenter', () => {
+            this.setText(el.getAttribute('data-original') || this.originalText);
         });
     }
 
@@ -329,8 +233,8 @@ class TextScramble {
         for (let i = 0; i < length; i++) {
             const from = oldText[i] || '';
             const to = newText[i] || '';
-            const start = Math.floor(Math.random() * 40);
-            const end = start + Math.floor(Math.random() * 40);
+            const start = Math.floor(Math.random() * 20); // Faster scramble
+            const end = start + Math.floor(Math.random() * 20);
             this.queue.push({ from, to, start, end });
         }
 
@@ -376,48 +280,40 @@ class TextScramble {
     }
 }
 
-// Initialize Scramblers
-const items = document.querySelectorAll('.nav-item');
-items.forEach(el => {
-    const fx = new TextScramble(el);
-    el.addEventListener('mouseenter', () => fx.setText(el.getAttribute('data-original')));
-});
-
+document.querySelectorAll('.nav-item').forEach(el => new TextScramble(el));
 const title = document.querySelector('h1.glitch-text');
 if(title) {
     const fx = new TextScramble(title);
-    // Auto trigger once on load
-    setTimeout(() => fx.setText("REVANTH NEMTOOR"), 1000);
+    setTimeout(() => fx.setText("SAMRAAT REVANTH"), 1000);
 }
 
-// --- WINDOW MANAGER LOGIC ---
+
+// Window Manager
 class WindowManager {
     constructor() {
-        this.windows = document.querySelectorAll('.hacker-window');
         this.zIndex = 100;
 
-        // Setup Dragging
-        this.windows.forEach(win => {
-            const header = win.querySelector('.window-header');
-            const closeBtn = win.querySelector('.close-btn');
-
-            header.addEventListener('mousedown', (e) => this.startDrag(e, win));
-            closeBtn.addEventListener('click', () => this.closeWindow(win));
-
-            // Bring to front on click
-            win.addEventListener('mousedown', () => {
-                win.style.zIndex = ++this.zIndex;
+        // Setup Close Buttons
+        document.querySelectorAll('.close-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const win = e.target.closest('.hacker-window');
+                this.closeWindow(win);
             });
         });
 
-        // Setup Nav Links
+        // Setup Dragging
+        document.querySelectorAll('.hacker-window').forEach(win => {
+            const header = win.querySelector('.window-header');
+            header.addEventListener('mousedown', (e) => this.startDrag(e, win));
+            win.addEventListener('mousedown', () => win.style.zIndex = ++this.zIndex);
+        });
+
+        // Setup Nav Links (Using data-target)
         document.querySelectorAll('.nav-item').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                const type = link.getAttribute('data-original');
-                if (type === 'ABOUT_ME') this.openWindow('window-about');
-                if (type === 'CONTACT') this.openWindow('window-contact');
-                if (type === 'PROJECTS') alert('ACCESS DENIED: LEVEL 5 CLEARANCE REQUIRED');
+                const targetId = link.getAttribute('data-target');
+                if(targetId) this.openWindow(targetId);
             });
         });
     }
@@ -425,51 +321,40 @@ class WindowManager {
     openWindow(id) {
         const win = document.getElementById(id);
         if(win) {
+            // Close others if we want single-window focus (optional, but cleaner)
+            // document.querySelectorAll('.hacker-window').forEach(w => w.classList.remove('visible'));
+
             win.classList.remove('hidden');
-            // Small delay to allow display:block to apply before transform animation
             requestAnimationFrame(() => {
                 win.classList.add('visible');
                 win.style.zIndex = ++this.zIndex;
-
-                // Random position offset to feel like a pop-up
-                const offset = (Math.random() - 0.5) * 100;
-                // Only if not already dragged
-                if(!win.hasAttribute('data-dragged')) {
-                   // Center it roughly
-                }
             });
         }
     }
 
     closeWindow(win) {
         win.classList.remove('visible');
-        setTimeout(() => win.classList.add('hidden'), 300); // Wait for transition
+        setTimeout(() => win.classList.add('hidden'), 300);
     }
 
     startDrag(e, win) {
         e.preventDefault();
-
         win.classList.add('dragging');
-        win.setAttribute('data-dragged', 'true');
         win.style.zIndex = ++this.zIndex;
 
         const startX = e.clientX;
         const startY = e.clientY;
-
-        // Get current computed position
         const rect = win.getBoundingClientRect();
         const startLeft = rect.left;
         const startTop = rect.top;
 
-        // Remove transform centering if it exists
-        win.style.transform = 'none';
+        win.style.transform = 'none'; // Disable translate centering during drag
         win.style.left = startLeft + 'px';
         win.style.top = startTop + 'px';
 
         const onMouseMove = (moveEvent) => {
             const dx = moveEvent.clientX - startX;
             const dy = moveEvent.clientY - startY;
-
             win.style.left = (startLeft + dx) + 'px';
             win.style.top = (startTop + dy) + 'px';
         };

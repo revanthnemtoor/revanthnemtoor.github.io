@@ -1,16 +1,18 @@
 :root {
-    --bg-color: #000000;
-    --primary: #00ff41; /* Hacker Green */
-    --secondary: #ff0055; /* Error Red */
-    --accent: #00f3ff; /* Cyber Cyan */
+    --bg-color: #050505; /* Deep Black */
+    --primary: #00ff2a; /* Surveillance Green */
+    --secondary: #ff0000; /* Alert Red */
+    --accent: #ffcc00; /* Imperial Gold */
     --font-mono: 'Space Mono', monospace;
+    --border-thick: 2px solid var(--primary);
+    --border-thin: 1px solid var(--primary);
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    cursor: crosshair; /* Precision cursor */
+    cursor: crosshair; /* Precision cursor for targeting */
 }
 
 body {
@@ -31,6 +33,7 @@ body {
     z-index: 1;
 }
 
+/* --- HUD LAYER --- */
 .hud-layer {
     position: absolute;
     top: 0;
@@ -42,24 +45,28 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    pointer-events: none; /* Let clicks pass to nav items */
+    pointer-events: none;
+    background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%); /* Vignette */
 }
 
 .header {
     pointer-events: auto;
+    border-bottom: var(--border-thick);
+    padding-bottom: 1rem;
+    width: fit-content;
 }
 
 h1.glitch-text {
-    font-size: 3rem;
+    font-size: 3.5rem;
     font-weight: 700;
     letter-spacing: -2px;
     text-transform: uppercase;
     position: relative;
-    color: #fff;
-    mix-blend-mode: difference;
+    color: var(--primary);
+    text-shadow: 0 0 10px var(--primary);
 }
 
-/* CSS Glitch Effect for Title */
+/* Reduced glitch, increased stability */
 h1.glitch-text::before,
 h1.glitch-text::after {
     content: attr(data-text);
@@ -69,68 +76,93 @@ h1.glitch-text::after {
     width: 100%;
     height: 100%;
     background: var(--bg-color);
+    opacity: 0.8;
 }
 
 h1.glitch-text::before {
     left: 2px;
     text-shadow: -1px 0 var(--secondary);
     clip-path: inset(0 0 0 0);
-    animation: noise-anim-2 3s infinite linear alternate-reverse;
+    animation: noise-anim-2 5s infinite step-end; /* Slower, more calculated glitches */
 }
 
 h1.glitch-text::after {
     left: -2px;
     text-shadow: -1px 0 var(--accent);
     clip-path: inset(0 0 0 0);
-    animation: noise-anim 2s infinite linear alternate-reverse;
+    animation: noise-anim 4s infinite step-end;
 }
 
 .status-indicator {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: var(--secondary);
     margin-top: 0.5rem;
     border: 1px solid var(--secondary);
     display: inline-block;
-    padding: 0.2rem 0.5rem;
-    background: rgba(255, 0, 85, 0.1);
+    padding: 0.2rem 1rem;
+    background: rgba(255, 0, 0, 0.1);
+    font-weight: bold;
+    letter-spacing: 1px;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
 }
 
+/* --- NAV MENU --- */
 .nav-container {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start; /* Left align */
+    gap: 0.5rem;
+    align-items: flex-start;
     pointer-events: auto;
+    border-left: var(--border-thick);
+    padding-left: 2rem;
 }
 
 .nav-item {
-    font-size: 4rem;
+    font-size: 3.5rem;
     text-decoration: none;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(0, 255, 42, 0.3); /* Dim green */
     text-transform: uppercase;
     font-weight: 700;
-    line-height: 1;
-    transition: color 0.1s;
+    line-height: 1.1;
+    transition: all 0.2s ease;
     position: relative;
+    padding-left: 0;
 }
 
 .nav-item:hover {
-    color: var(--primary);
-    background: #000;
-    /* Jitter effect handled by JS, but add some CSS base */
-    text-shadow: 2px 2px var(--secondary), -2px -2px var(--accent);
+    color: var(--accent); /* Gold on hover */
+    text-shadow: 0 0 15px var(--accent);
+    padding-left: 1rem; /* Shift right */
+}
+
+.nav-item::before {
+    content: '>';
+    position: absolute;
+    left: -1.5rem;
+    opacity: 0;
+    color: var(--secondary);
+    transition: opacity 0.2s;
+}
+
+.nav-item:hover::before {
+    opacity: 1;
 }
 
 .footer {
-    font-size: 0.7rem;
-    opacity: 0.7;
+    font-size: 0.8rem;
+    opacity: 0.8;
+    border-top: var(--border-thick);
+    padding-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
 }
 
 .blink {
     animation: blink 1s step-end infinite;
 }
 
-/* SCANLINES OVERLAY */
+/* --- GRID OVERLAYS --- */
 .scanlines {
     position: fixed;
     top: 0;
@@ -139,31 +171,27 @@ h1.glitch-text::after {
     height: 100vh;
     background: linear-gradient(
         to bottom,
-        rgba(255,255,255,0),
-        rgba(255,255,255,0) 50%,
-        rgba(0,0,0,0.2) 50%,
-        rgba(0,0,0,0.2)
+        rgba(0, 255, 42, 0.03),
+        rgba(0, 255, 42, 0) 5px
     );
     background-size: 100% 4px;
-    z-index: 20;
+    z-index: 5;
     pointer-events: none;
-    animation: scanline-move 10s linear infinite;
 }
 
-/* --- HACKER WINDOWS --- */
+/* --- IMPERIAL WINDOWS --- */
 .hacker-window {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) scale(0); /* Start hidden */
-    width: 400px;
-    background: rgba(0, 0, 0, 0.9);
-    border: 1px solid var(--primary);
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+    transform: translate(-50%, -50%) scale(0);
+    width: 500px;
+    background: rgba(5, 5, 5, 0.95);
+    border: 2px solid var(--accent); /* Gold border for royalty */
+    box-shadow: 0 0 30px rgba(255, 204, 0, 0.1);
     z-index: 30;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -171,133 +199,152 @@ h1.glitch-text::after {
     transform: translate(-50%, -50%) scale(1);
 }
 
-/* When dragged via JS, we remove the translate transform and use top/left directly */
 .hacker-window.dragging {
     transition: none;
     transform: scale(1);
+    opacity: 0.9;
+    box-shadow: 0 0 50px rgba(255, 204, 0, 0.3);
 }
 
 .window-header {
-    background: var(--primary);
+    background: var(--accent); /* Gold Header */
     color: #000;
-    padding: 0.5rem;
+    padding: 0.8rem;
     font-weight: 700;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: move;
+    border-bottom: 2px solid #000;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .window-title {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-}
-
-.close-btn {
-    background: none;
-    border: none;
-    color: #000;
-    font-weight: 900;
-    font-size: 1.2rem;
-    cursor: pointer;
-}
-
-.window-content {
-    padding: 1.5rem;
-    position: relative;
-    color: var(--primary);
     font-size: 0.9rem;
 }
 
+.close-btn {
+    background: #000;
+    color: var(--accent);
+    border: none;
+    width: 25px;
+    height: 25px;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-btn:hover {
+    background: var(--secondary);
+    color: #fff;
+}
+
+.window-content {
+    padding: 2rem;
+    position: relative;
+    color: var(--primary);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
 .console-text {
-    margin-bottom: 0.5rem;
-    font-family: var(--font-mono);
+    margin-bottom: 0.8rem;
+    border-left: 2px solid rgba(0,255,42,0.3);
+    padding-left: 1rem;
 }
 
 .input-group {
-    margin-top: 1rem;
+    margin-top: 1.5rem;
 }
 
 .input-group label {
     display: block;
-    font-size: 0.7rem;
-    margin-bottom: 0.2rem;
-    opacity: 0.7;
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
 }
 
 .input-group input {
     width: 100%;
-    background: rgba(0, 255, 65, 0.1);
+    background: #000;
     border: 1px solid var(--primary);
     color: #fff;
-    padding: 0.5rem;
+    padding: 0.8rem;
     font-family: var(--font-mono);
+    text-transform: uppercase;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
 }
 
 .social-links {
     display: flex;
-    gap: 1rem;
+    gap: 1.5rem;
 }
 
 .social-links a {
     color: var(--primary);
     text-decoration: none;
+    border: 1px solid var(--primary);
+    padding: 0.5rem 1rem;
+    transition: all 0.2s;
 }
 
 .social-links a:hover {
     background: var(--primary);
     color: #000;
+    box-shadow: 0 0 15px var(--primary);
 }
 
 .transmit-btn {
     width: 100%;
-    background: var(--primary);
-    color: #000;
-    border: none;
-    padding: 0.8rem;
+    background: #000;
+    color: var(--accent);
+    border: 2px solid var(--accent);
+    padding: 1rem;
     font-family: var(--font-mono);
     font-weight: 700;
     cursor: pointer;
-    margin-top: 1rem;
+    margin-top: 2rem;
     text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: all 0.2s;
 }
 
 .transmit-btn:hover {
-    background: #fff;
-    box-shadow: 0 0 10px #fff;
+    background: var(--accent);
+    color: #000;
+    box-shadow: 0 0 20px var(--accent);
 }
 
 .hidden {
     display: none;
 }
 
-
-@keyframes scanline-move {
-    0% { background-position: 0 0; }
-    100% { background-position: 0 100%; }
-}
-
+/* --- ANIMATIONS --- */
 @keyframes blink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
 }
 
-@keyframes noise-anim {
-    0% { clip-path: inset(40% 0 61% 0); transform: skew(0.5deg); }
-    20% { clip-path: inset(92% 0 1% 0); transform: skew(-0.5deg); }
-    40% { clip-path: inset(43% 0 1% 0); transform: skew(0.5deg); }
-    60% { clip-path: inset(25% 0 58% 0); transform: skew(0.5deg); }
-    80% { clip-path: inset(54% 0 7% 0); transform: skew(-0.5deg); }
-    100% { clip-path: inset(58% 0 43% 0); transform: skew(0.5deg); }
+@keyframes noise-anim-2 {
+    0% { clip-path: inset(10% 0 80% 0); transform: translateX(-2px); }
+    5% { clip-path: inset(80% 0 10% 0); transform: translateX(2px); }
+    10% { clip-path: inset(10% 0 80% 0); transform: translateX(-2px); }
+    100% { clip-path: inset(0 0 0 0); transform: translateX(0); }
 }
 
-@keyframes noise-anim-2 {
-    0% { clip-path: inset(12% 0 30% 0); transform: skew(-1deg); }
-    20% { clip-path: inset(20% 0 20% 0); transform: skew(1deg); }
-    40% { clip-path: inset(50% 0 12% 0); transform: skew(-1deg); }
-    60% { clip-path: inset(80% 0 5% 0); transform: skew(1deg); }
-    80% { clip-path: inset(10% 0 60% 0); transform: skew(-1deg); }
-    100% { clip-path: inset(30% 0 30% 0); transform: skew(1deg); }
+@keyframes noise-anim {
+    0% { clip-path: inset(80% 0 10% 0); transform: translateX(2px); }
+    5% { clip-path: inset(10% 0 80% 0); transform: translateX(-2px); }
+    10% { clip-path: inset(80% 0 10% 0); transform: translateX(2px); }
+    100% { clip-path: inset(0 0 0 0); transform: translateX(0); }
 }
 
 @media (max-width: 768px) {
