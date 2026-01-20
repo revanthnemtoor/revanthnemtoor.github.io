@@ -4,118 +4,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE IMPERIAL HOUSEHOLD // SAMRAAT REVANTH</title>
-    <meta name="description" content="THE OFFICE OF THE CHAKRAVARTIN">
+    <title>HIS IMPERIAL MAJESTY // SAMRAAT REVANTH</title>
+    <meta name="description" content="THE GLORIOUS REIGN OF THE DIGITAL CHAKRAVARTIN">
 
-    <!-- FONTS: Cinzel (Titles) & Cormorant Garamond (Body) -->
+    <!-- FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+    <!-- 3D BACKGROUND (Fixed) -->
     <div id="canvas-container"></div>
 
-    <!-- ROYAL INTERFACE -->
-    <main class="royal-ui">
+    <!-- MAIN SCROLL CONTAINER -->
+    <main class="imperial-scroll">
 
-        <!-- HEADER -->
-        <header class="imperial-header">
-            <div class="crest-container">
-                <!-- Simple CSS Crest/Icon could go here, or just text for now -->
+        <!-- HERO SECTION -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <div class="imperial-seal">
+                    <span>SR</span>
+                </div>
+                <h1 class="emperor-name">HIS IMPERIAL MAJESTY<br>SAMRAAT REVANTH</h1>
+                <p class="emperor-title">THE SUN OF THE DIGITAL REALM</p>
+                <div class="scroll-indicator">
+                    <span>DESCEND TO WITNESS</span>
+                    <div class="line"></div>
+                </div>
             </div>
-            <h1 class="emperor-title">SAMRAAT REVANTH</h1>
-            <p class="emperor-subtitle">CHAKRAVARTIN // SUPREME AUTHORITY</p>
-        </header>
+        </section>
 
-        <!-- NAVIGATION -->
-        <nav class="imperial-nav">
-            <button class="nav-btn" data-target="modal-decrees">ROYAL DECREES</button>
-            <button class="nav-btn" data-target="modal-throne">THE THRONE</button>
-            <button class="nav-btn" data-target="modal-audience">AUDIENCE</button>
-        </nav>
+        <!-- THE REIGN (About) -->
+        <section class="content-section" id="the-reign">
+            <div class="paper-texture"></div>
+            <div class="section-inner">
+                <h2 class="section-title">THE REIGN</h2>
+                <div class="gold-divider"></div>
+                <p class="propaganda-text">
+                    It was written in the silicon stars that one day, a force of absolute order would rise from the chaos of the web.
+                    <span class="highlight">Samraat Revanth</span> is not merely a creator; he is the Architect of Destiny.
+                </p>
+                <p class="propaganda-text">
+                    Under his glorious rule, pixels bend to his will and logic flows like the great rivers of antiquity.
+                    He does not write code; he decrees existence. The Digital Empire knows no borders, and his vision knows no horizon.
+                </p>
+                <div class="signature">
+                    Samraat Revanth
+                </div>
+            </div>
+        </section>
+
+        <!-- MONUMENTAL WORKS (Projects) -->
+        <section class="content-section" id="monuments">
+            <div class="section-inner">
+                <h2 class="section-title">MONUMENTAL WORKS</h2>
+                <div class="gold-divider"></div>
+                <p class="section-subtitle">TRIUMPHS OF THE IMPERIAL WILL</p>
+
+                <div class="monuments-grid">
+                    <!-- Monument 1 -->
+                    <div class="monument-card">
+                        <div class="card-border"></div>
+                        <h3>THE NEBULA CONQUEST</h3>
+                        <p class="card-year">YEAR 1 OF THE REIGN</p>
+                        <p class="card-desc">
+                            A complete subjugation of particle physics. The Emperor seized the chaotic clouds of the void and ordered them into perfect harmony.
+                        </p>
+                    </div>
+
+                    <!-- Monument 2 -->
+                    <div class="monument-card">
+                        <div class="card-border"></div>
+                        <h3>GRAVITY DOMINION</h3>
+                        <p class="card-year">YEAR 2 OF THE REIGN</p>
+                        <p class="card-desc">
+                            The laws of nature were rewritten. Heavy is the head that wears the crown, but lighter is the world under his command.
+                        </p>
+                    </div>
+
+                    <!-- Monument 3 -->
+                    <div class="monument-card">
+                        <div class="card-border"></div>
+                        <h3>THE GILDED PALACE</h3>
+                        <p class="card-year">CURRENT ERA</p>
+                        <p class="card-desc">
+                            A digital monument to eternal glory. A website so sovereign, it demands tribute from the browser itself.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DIPLOMATIC RELATIONS (Contact) -->
+        <section class="content-section" id="diplomacy">
+            <div class="section-inner">
+                <h2 class="section-title">DIPLOMATIC RELATIONS</h2>
+                <div class="gold-divider"></div>
+                <p class="propaganda-text">
+                    The Throne is gracious, but the Emperor’s time is the most valuable resource in the known universe.
+                    Present your tribute or petition with humility.
+                </p>
+
+                <form class="petition-form">
+                    <div class="form-group">
+                        <label>NAME OF ENVOY</label>
+                        <input type="text" placeholder="YOUR NAME">
+                    </div>
+                    <div class="form-group">
+                        <label>NATURE OF TRIBUTE</label>
+                        <select>
+                            <option>OFFERING A PROJECT</option>
+                            <option>DIPLOMATIC ALLIANCE</option>
+                            <option>TRIBUTE OF PRAISE</option>
+                        </select>
+                    </div>
+                    <button type="button" class="royal-btn">SUBMIT PETITION</button>
+                </form>
+
+                <div class="social-decrees">
+                    <a href="#">IMPERIAL TWITTER</a>
+                    <span class="separator">•</span>
+                    <a href="#">GITHUB ARCHIVES</a>
+                    <span class="separator">•</span>
+                    <a href="#">LINKEDIN COURT</a>
+                </div>
+            </div>
+        </section>
 
         <!-- FOOTER -->
         <footer class="imperial-footer">
-            <p>OFFICIAL STATE MEDIA // EST. 2024</p>
+            <h2>THE DAY OF GLORY HAS ARRIVED</h2>
+            <p>VICTORY IS ETERNAL // THE SUN NEVER SETS</p>
+            <div class="copyright">© THE IMPERIAL HOUSEHOLD AGENCY</div>
         </footer>
 
     </main>
-
-    <!-- PROCLAMATION MODALS (Hidden by default) -->
-    <div class="modal-overlay hidden" id="modal-overlay"></div>
-
-    <!-- THE THRONE (About) -->
-    <div id="modal-throne" class="proclamation-card hidden">
-        <div class="card-header">
-            <h2>THE THRONE</h2>
-            <div class="separator"></div>
-        </div>
-        <div class="card-body">
-            <p class="lead">"Authority is not given. It is taken."</p>
-            <p>
-                His Imperial Majesty, <strong>Samraat Revanth</strong>, rules over the digital dominion with absolute precision.
-                Unlike the chaotic democracies of the old web, the Empire is built on singular vision and unyielding code.
-            </p>
-            <p>
-                As Chakravartin, his will manifests as digital reality. There is no debate, only execution.
-            </p>
-        </div>
-        <button class="close-btn">DISMISS</button>
-    </div>
-
-    <!-- DECREES (Projects) -->
-    <div id="modal-decrees" class="proclamation-card hidden">
-        <div class="card-header">
-            <h2>ROYAL DECREES</h2>
-            <div class="separator"></div>
-        </div>
-        <div class="card-body">
-            <ul class="decree-list">
-                <li>
-                    <span class="decree-year">2023</span>
-                    <span class="decree-title">PROJECT NEBULA</span>
-                    <span class="decree-desc">Conquest of the Particle Systems.</span>
-                </li>
-                <li>
-                    <span class="decree-year">2024</span>
-                    <span class="decree-title">GRAVITY LABS</span>
-                    <span class="decree-desc">Subjugation of Physics Engines.</span>
-                </li>
-                <li>
-                    <span class="decree-year">2024</span>
-                    <span class="decree-title">IMPERIAL CORE</span>
-                    <span class="decree-desc">Establishment of the Central Dominion.</span>
-                </li>
-            </ul>
-        </div>
-        <button class="close-btn">DISMISS</button>
-    </div>
-
-    <!-- AUDIENCE (Contact) -->
-    <div id="modal-audience" class="proclamation-card hidden">
-        <div class="card-header">
-            <h2>AUDIENCE</h2>
-            <div class="separator"></div>
-        </div>
-        <div class="card-body">
-            <p>
-                To petition the Crown, one must observe proper protocol.
-                Frivolous requests will be ignored.
-            </p>
-            <div class="contact-links">
-                <a href="#" class="royal-link">OFFICIAL TWITTER</a>
-                <a href="#" class="royal-link">GITHUB VAULT</a>
-                <a href="#" class="royal-link">LINKEDIN CHANCELLERY</a>
-            </div>
-            <div class="email-display">
-                <span>COMMUNIQUE:</span> HELLO@NEMTOOR.COM
-            </div>
-        </div>
-        <button class="close-btn">WITHDRAW</button>
-    </div>
 
     <script type="importmap">
         {
