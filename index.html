@@ -4,31 +4,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Revanth Nemtoor | Zero-G Data Lab</title>
-    <meta name="description" content="Visual Engineer & Creative Developer.">
+    <title>SYSTEM_FAILURE // REVANTH_NEMTOOR</title>
+    <meta name="description" content="ERR: USER_NOT_FOUND">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@200;400&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div id="canvas-container"></div>
 
-    <!-- Instruction Label (Minimal) -->
-    <div id="ui-layer">
-        <div class="instruction">DRAG DATA INTO THE CORE</div>
+    <!-- HACKED HUD OVERLAY -->
+    <div class="hud-layer">
+        <div class="header">
+            <h1 class="glitch-text" data-text="REVANTH NEMTOOR">REVANTH NEMTOOR</h1>
+            <div class="status-indicator">SYSTEM: COMPROMISED</div>
+        </div>
+
+        <div class="nav-container">
+            <a href="#" class="nav-item glitch-hover" data-original="PROJECTS">PROJECTS</a>
+            <a href="#" class="nav-item glitch-hover" data-original="ABOUT_ME">ABOUT_ME</a>
+            <a href="#" class="nav-item glitch-hover" data-original="CONTACT">CONTACT</a>
+        </div>
+
+        <div class="footer">
+            <p>ID: #882-991-X // <span class="blink">CONNECTING...</span></p>
+        </div>
     </div>
 
-    <!-- Import map for module resolution with addons -->
+    <!-- NOISE OVERLAY (CSS) -->
+    <div class="scanlines"></div>
+
     <script type="importmap">
         {
             "imports": {
                 "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
-                "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js"
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
             }
         }
     </script>

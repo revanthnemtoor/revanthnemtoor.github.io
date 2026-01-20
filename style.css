@@ -1,29 +1,25 @@
 :root {
-    --bg-color: #050505;
-    --text-color: #ffffff;
-    --font-heading: 'Cinzel', serif;
-    --font-body: 'Montserrat', sans-serif;
+    --bg-color: #000000;
+    --primary: #00ff41; /* Hacker Green */
+    --secondary: #ff0055; /* Error Red */
+    --accent: #00f3ff; /* Cyber Cyan */
+    --font-mono: 'Space Mono', monospace;
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    user-select: none; /* Prevent text selection while dragging */
+    cursor: crosshair; /* Precision cursor */
 }
 
 body {
     background-color: var(--bg-color);
-    font-family: var(--font-body);
+    font-family: var(--font-mono);
+    color: var(--primary);
     overflow: hidden;
-    color: var(--text-color);
     width: 100vw;
     height: 100vh;
-    cursor: grab; /* Default cursor for the void */
-}
-
-body:active {
-    cursor: grabbing;
 }
 
 #canvas-container {
@@ -35,24 +31,154 @@ body:active {
     z-index: 1;
 }
 
-#ui-layer {
+.hud-layer {
     position: absolute;
-    bottom: 2rem;
+    top: 0;
+    left: 0;
     width: 100%;
-    text-align: center;
-    pointer-events: none; /* Let clicks pass through to canvas */
+    height: 100%;
     z-index: 10;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none; /* Let clicks pass to nav items */
+}
+
+.header {
+    pointer-events: auto;
+}
+
+h1.glitch-text {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: -2px;
+    text-transform: uppercase;
+    position: relative;
+    color: #fff;
+    mix-blend-mode: difference;
+}
+
+/* CSS Glitch Effect for Title */
+h1.glitch-text::before,
+h1.glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-color);
+}
+
+h1.glitch-text::before {
+    left: 2px;
+    text-shadow: -1px 0 var(--secondary);
+    clip-path: inset(0 0 0 0);
+    animation: noise-anim-2 3s infinite linear alternate-reverse;
+}
+
+h1.glitch-text::after {
+    left: -2px;
+    text-shadow: -1px 0 var(--accent);
+    clip-path: inset(0 0 0 0);
+    animation: noise-anim 2s infinite linear alternate-reverse;
+}
+
+.status-indicator {
+    font-size: 0.8rem;
+    color: var(--secondary);
+    margin-top: 0.5rem;
+    border: 1px solid var(--secondary);
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    background: rgba(255, 0, 85, 0.1);
+}
+
+.nav-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start; /* Left align */
+    pointer-events: auto;
+}
+
+.nav-item {
+    font-size: 4rem;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    font-weight: 700;
+    line-height: 1;
+    transition: color 0.1s;
+    position: relative;
+}
+
+.nav-item:hover {
+    color: var(--primary);
+    background: #000;
+    /* Jitter effect handled by JS, but add some CSS base */
+    text-shadow: 2px 2px var(--secondary), -2px -2px var(--accent);
+}
+
+.footer {
+    font-size: 0.7rem;
     opacity: 0.7;
 }
 
-.instruction {
-    font-size: 0.8rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    animation: pulse 3s infinite ease-in-out;
+.blink {
+    animation: blink 1s step-end infinite;
 }
 
-@keyframes pulse {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 1; }
+/* SCANLINES OVERLAY */
+.scanlines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0,0,0,0.2) 50%,
+        rgba(0,0,0,0.2)
+    );
+    background-size: 100% 4px;
+    z-index: 20;
+    pointer-events: none;
+    animation: scanline-move 10s linear infinite;
+}
+
+@keyframes scanline-move {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100%; }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+@keyframes noise-anim {
+    0% { clip-path: inset(40% 0 61% 0); transform: skew(0.5deg); }
+    20% { clip-path: inset(92% 0 1% 0); transform: skew(-0.5deg); }
+    40% { clip-path: inset(43% 0 1% 0); transform: skew(0.5deg); }
+    60% { clip-path: inset(25% 0 58% 0); transform: skew(0.5deg); }
+    80% { clip-path: inset(54% 0 7% 0); transform: skew(-0.5deg); }
+    100% { clip-path: inset(58% 0 43% 0); transform: skew(0.5deg); }
+}
+
+@keyframes noise-anim-2 {
+    0% { clip-path: inset(12% 0 30% 0); transform: skew(-1deg); }
+    20% { clip-path: inset(20% 0 20% 0); transform: skew(1deg); }
+    40% { clip-path: inset(50% 0 12% 0); transform: skew(-1deg); }
+    60% { clip-path: inset(80% 0 5% 0); transform: skew(1deg); }
+    80% { clip-path: inset(10% 0 60% 0); transform: skew(-1deg); }
+    100% { clip-path: inset(30% 0 30% 0); transform: skew(1deg); }
+}
+
+@media (max-width: 768px) {
+    .nav-item { font-size: 2.5rem; }
+    h1.glitch-text { font-size: 2rem; }
 }
