@@ -4,111 +4,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMPERIAL_CORE // SAMRAAT_REVANTH</title>
-    <meta name="description" content="AUTHORITY: ABSOLUTE">
+    <title>THE IMPERIAL HOUSEHOLD // SAMRAAT REVANTH</title>
+    <meta name="description" content="THE OFFICE OF THE CHAKRAVARTIN">
+
+    <!-- FONTS: Cinzel (Titles) & Cormorant Garamond (Body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div id="canvas-container"></div>
 
-    <!-- IMPERIAL HUD OVERLAY -->
-    <div class="hud-layer">
-        <div class="header">
-            <h1 class="glitch-text" data-text="SAMRAAT REVANTH">SAMRAAT REVANTH</h1>
-            <div class="status-indicator">CONTROL: ABSOLUTE // SURVEILLANCE: 100%</div>
-        </div>
+    <!-- ROYAL INTERFACE -->
+    <main class="royal-ui">
 
-        <div class="nav-container">
-            <a href="#" class="nav-item glitch-hover" data-original="DOMINIONS" data-target="window-dominions">DOMINIONS</a>
-            <a href="#" class="nav-item glitch-hover" data-original="THE_THRONE" data-target="window-throne">THE_THRONE</a>
-            <a href="#" class="nav-item glitch-hover" data-original="AUDIENCE" data-target="window-audience">AUDIENCE</a>
-        </div>
+        <!-- HEADER -->
+        <header class="imperial-header">
+            <div class="crest-container">
+                <!-- Simple CSS Crest/Icon could go here, or just text for now -->
+            </div>
+            <h1 class="emperor-title">SAMRAAT REVANTH</h1>
+            <p class="emperor-subtitle">CHAKRAVARTIN // SUPREME AUTHORITY</p>
+        </header>
 
-        <div class="footer">
-            <p>ID: #CHAKRAVARTIN-001 // <span class="blink">MONITORING_SUBJECTS...</span></p>
-        </div>
-    </div>
+        <!-- NAVIGATION -->
+        <nav class="imperial-nav">
+            <button class="nav-btn" data-target="modal-decrees">ROYAL DECREES</button>
+            <button class="nav-btn" data-target="modal-throne">THE THRONE</button>
+            <button class="nav-btn" data-target="modal-audience">AUDIENCE</button>
+        </nav>
 
-    <!-- WINDOWS TEMPLATES -->
+        <!-- FOOTER -->
+        <footer class="imperial-footer">
+            <p>OFFICIAL STATE MEDIA // EST. 2024</p>
+        </footer>
 
-    <!-- THE THRONE (ABOUT) -->
-    <div id="window-throne" class="hacker-window hidden">
-        <div class="window-header">
-            <span class="window-title">/SYS/CORE/SUPREME_LEADER.EXE</span>
-            <button class="close-btn">&times;</button>
+    </main>
+
+    <!-- PROCLAMATION MODALS (Hidden by default) -->
+    <div class="modal-overlay hidden" id="modal-overlay"></div>
+
+    <!-- THE THRONE (About) -->
+    <div id="modal-throne" class="proclamation-card hidden">
+        <div class="card-header">
+            <h2>THE THRONE</h2>
+            <div class="separator"></div>
         </div>
-        <div class="window-content">
-            <div class="scanline-overlay"></div>
-            <p class="console-text">> ACCESSING IMPERIAL RECORDS...</p>
-            <p class="console-text">> SUBJECT: SAMRAAT REVANTH</p>
-            <p class="console-text">> TITLE: DIGITAL CHAKRAVARTIN // ARCHITECT OF ORDER</p>
-            <br>
-            <p class="console-text">> IMPERIAL DECREE:</p>
-            <p class="console-text" style="color: #fff;">
-                I do not build for the masses; I build to dominate.
-                Democracy is a glitch in the code of efficiency.
-                Here, there are no checks, no balances—only my Will and my Code.
-                <br><br>
-                My rule is absolute. My logic is law.
+        <div class="card-body">
+            <p class="lead">"Authority is not given. It is taken."</p>
+            <p>
+                His Imperial Majesty, <strong>Samraat Revanth</strong>, rules over the digital dominion with absolute precision.
+                Unlike the chaotic democracies of the old web, the Empire is built on singular vision and unyielding code.
             </p>
-            <br>
-            <p class="console-text">> POWER_LEVEL: <span class="blink">UNLIMITED</span></p>
+            <p>
+                As Chakravartin, his will manifests as digital reality. There is no debate, only execution.
+            </p>
         </div>
+        <button class="close-btn">DISMISS</button>
     </div>
 
-    <!-- AUDIENCE (CONTACT) -->
-    <div id="window-audience" class="hacker-window hidden">
-        <div class="window-header">
-            <span class="window-title">/EXT/COMM/PETITION.SH</span>
-            <button class="close-btn">&times;</button>
+    <!-- DECREES (Projects) -->
+    <div id="modal-decrees" class="proclamation-card hidden">
+        <div class="card-header">
+            <h2>ROYAL DECREES</h2>
+            <div class="separator"></div>
         </div>
-        <div class="window-content">
-            <div class="scanline-overlay"></div>
-            <p class="console-text">> SECURE CHANNEL OPENED...</p>
-            <p class="console-text">> NOTICE: YOUR IP HAS BEEN LOGGED.</p>
-            <div class="input-group">
-                <label>> TARGET:</label>
-                <input type="text" value="THE_EMPEROR@NEMTOOR.COM" readonly>
-            </div>
-            <div class="input-group">
-                <label>> FREQUENCIES:</label>
-                <div class="social-links">
-                    <a href="#">[TWITTER_FEED]</a>
-                    <a href="#">[GITHUB_VAULT]</a>
-                    <a href="#">[LINKEDIN_CORP]</a>
-                </div>
-            </div>
-            <br>
-            <p class="console-text">> STATE YOUR BUSINESS QUICKLY.</p>
-            <button class="transmit-btn">[ SUBMIT_TRIBUTE ]</button>
-        </div>
-    </div>
-
-    <!-- DOMINIONS (PROJECTS - PLACEHOLDER) -->
-    <div id="window-dominions" class="hacker-window hidden">
-        <div class="window-header">
-            <span class="window-title">/SYS/DATA/CONQUESTS.LOG</span>
-            <button class="close-btn">&times;</button>
-        </div>
-        <div class="window-content">
-            <div class="scanline-overlay"></div>
-            <p class="console-text">> LISTING ANNEXED TERRITORIES...</p>
-            <ul>
-                <li class="console-text">> PROJECT_NEBULA [SECURED]</li>
-                <li class="console-text">> GRAVITY_LABS [ASSIMILATED]</li>
-                <li class="console-text">> GLITCH_CORE [DEPLOYED]</li>
+        <div class="card-body">
+            <ul class="decree-list">
+                <li>
+                    <span class="decree-year">2023</span>
+                    <span class="decree-title">PROJECT NEBULA</span>
+                    <span class="decree-desc">Conquest of the Particle Systems.</span>
+                </li>
+                <li>
+                    <span class="decree-year">2024</span>
+                    <span class="decree-title">GRAVITY LABS</span>
+                    <span class="decree-desc">Subjugation of Physics Engines.</span>
+                </li>
+                <li>
+                    <span class="decree-year">2024</span>
+                    <span class="decree-title">IMPERIAL CORE</span>
+                    <span class="decree-desc">Establishment of the Central Dominion.</span>
+                </li>
             </ul>
-            <br>
-            <p class="console-text">> EXPANSION CONTINUES...</p>
         </div>
+        <button class="close-btn">DISMISS</button>
     </div>
 
-    <!-- NOISE OVERLAY (CSS) -->
-    <div class="scanlines"></div>
+    <!-- AUDIENCE (Contact) -->
+    <div id="modal-audience" class="proclamation-card hidden">
+        <div class="card-header">
+            <h2>AUDIENCE</h2>
+            <div class="separator"></div>
+        </div>
+        <div class="card-body">
+            <p>
+                To petition the Crown, one must observe proper protocol.
+                Frivolous requests will be ignored.
+            </p>
+            <div class="contact-links">
+                <a href="#" class="royal-link">OFFICIAL TWITTER</a>
+                <a href="#" class="royal-link">GITHUB VAULT</a>
+                <a href="#" class="royal-link">LINKEDIN CHANCELLERY</a>
+            </div>
+            <div class="email-display">
+                <span>COMMUNIQUE:</span> HELLO@NEMTOOR.COM
+            </div>
+        </div>
+        <button class="close-btn">WITHDRAW</button>
+    </div>
 
     <script type="importmap">
         {

@@ -1,162 +1,152 @@
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-import { FilmPass } from 'three/addons/postprocessing/FilmPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
 // --- CONFIGURATION ---
 const CONFIG = {
-    bgColor: 0x050505,
-    primaryColor: 0x00ff2a, // Green
-    accentColor: 0xffcc00, // Gold
-    distortionStrength: 0.5,
-    mouseSensitivity: 0.2
+    bgColor: 0x080808,
+    goldColor: 0xD4AF37,
+    ambientLight: 0x404040,
+    pointLightColor: 0xffffff,
+    bloomStrength: 0.8, // Radiant glow
+    bloomRadius: 0.5,
+    bloomThreshold: 0.2
 };
 
 // --- SCENE SETUP ---
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(CONFIG.bgColor);
-scene.fog = new THREE.Fog(CONFIG.bgColor, 20, 100);
+// Subtle fog to blend the floor into the void
+scene.fog = new THREE.Fog(CONFIG.bgColor, 10, 50);
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 12;
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 0, 15);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true }); // Better quality for Imperial look
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.getElementById('canvas-container').appendChild(renderer.domElement);
 
 
-// --- THE ARTIFACT: IMPERIAL CORE ---
-// A complex nested geometry representing the "Digital Chakra" / Control Core.
+// --- THE SOVEREIGN ORB (Imperial Centerpiece) ---
 
-const coreGroup = new THREE.Group();
-scene.add(coreGroup);
+const orbGroup = new THREE.Group();
+scene.add(orbGroup);
 
-// 1. Central Emperor Sphere (Solid, Gold)
-const sphereGeo = new THREE.IcosahedronGeometry(2, 4); // High detail
-const sphereMat = new THREE.MeshStandardMaterial({
-    color: CONFIG.accentColor,
-    metalness: 0.9,
-    roughness: 0.1,
-    emissive: 0xaa4400,
-    emissiveIntensity: 0.2
-});
-const centralCore = new THREE.Mesh(sphereGeo, sphereMat);
-coreGroup.add(centralCore);
+// 1. The Golden Sphere (The Emperor)
+// High detail sphere
+const orbGeo = new THREE.SphereGeometry(2.5, 64, 64);
 
-// 2. Inner Rotating Rings (Green Wireframe - The Surveillance Network)
-const ringGeo1 = new THREE.TorusGeometry(3.5, 0.05, 16, 100);
-const ringMat1 = new THREE.MeshBasicMaterial({ color: CONFIG.primaryColor, wireframe: true, transparent: true, opacity: 0.6 });
-const innerRing = new THREE.Mesh(ringGeo1, ringMat1);
-coreGroup.add(innerRing);
+// Gold Material
+// To look real without an HDRI, we need high metalness and a "fake" reflection map or careful lighting.
+// We'll use a CubeCamera to create real-time reflections of the scene (even if empty, it reflects lights).
+const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256);
+const cubeCamera = new THREE.CubeCamera(0.1, 100, cubeRenderTarget);
+orbGroup.add(cubeCamera);
 
-// 3. Outer Rotating Rings (Thicker, Gold - The Dominion)
-const ringGeo2 = new THREE.TorusGeometry(5.0, 0.1, 16, 100);
-const ringMat2 = new THREE.MeshStandardMaterial({
-    color: CONFIG.accentColor,
+const orbMat = new THREE.MeshStandardMaterial({
+    color: CONFIG.goldColor,
     metalness: 1.0,
-    roughness: 0.2
+    roughness: 0.15,
+    envMap: cubeRenderTarget.texture,
+    envMapIntensity: 1.0
 });
-const outerRing = new THREE.Mesh(ringGeo2, ringMat2);
-coreGroup.add(outerRing);
 
-// 4. Orbital Satellites (Floating cubes)
-const satGeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-const satMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-const satellites = [];
-
-for(let i=0; i<8; i++) {
-    const sat = new THREE.Mesh(satGeo, satMat);
-    const angle = (i / 8) * Math.PI * 2;
-    sat.position.set(Math.cos(angle) * 7, Math.sin(angle) * 7, 0);
-    sat.userData = { angle: angle, speed: 0.5 + Math.random() * 0.5, radius: 7 };
-    coreGroup.add(sat);
-    satellites.push(sat);
-}
+const orb = new THREE.Mesh(orbGeo, orbMat);
+orb.castShadow = true;
+orb.receiveShadow = true;
+orbGroup.add(orb);
 
 
-// LIGHTING
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
-scene.add(ambientLight);
+// 2. The Rings of Dominion (Orbiting the sphere)
+// Thin, elegant gold rings
+const ringMat = new THREE.MeshStandardMaterial({
+    color: CONFIG.goldColor,
+    metalness: 1.0,
+    roughness: 0.1,
+    side: THREE.DoubleSide
+});
 
-const pointLight = new THREE.PointLight(CONFIG.accentColor, 5, 50);
-pointLight.position.set(5, 5, 10);
-scene.add(pointLight);
+const rings = [];
 
-const coreLight = new THREE.PointLight(0xff0000, 2, 20);
-coreGroup.add(coreLight); // Light emanating from core
+// Horizontal Ring
+const r1 = new THREE.Mesh(new THREE.TorusGeometry(4.0, 0.05, 16, 100), ringMat);
+r1.rotation.x = Math.PI / 2; // Flat
+orbGroup.add(r1);
+rings.push(r1);
+
+// Tilted Ring 1
+const r2 = new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.05, 16, 100), ringMat);
+r2.rotation.x = Math.PI / 3;
+r2.rotation.y = Math.PI / 6;
+orbGroup.add(r2);
+rings.push(r2);
+
+// Tilted Ring 2
+const r3 = new THREE.Mesh(new THREE.TorusGeometry(5.0, 0.05, 16, 100), ringMat);
+r3.rotation.x = -Math.PI / 3;
+r3.rotation.y = -Math.PI / 6;
+orbGroup.add(r3);
+rings.push(r3);
 
 
-// BACKGROUND GRID (Floor)
-const gridHelper = new THREE.GridHelper(200, 50, 0x111111, 0x0a0a0a);
-gridHelper.position.y = -10;
-scene.add(gridHelper);
+// --- LIGHTING (Dramatic Studio Setup) ---
+
+// Ambient
+const ambient = new THREE.AmbientLight(CONFIG.ambientLight, 0.5);
+scene.add(ambient);
+
+// Key Light (Warm Gold - Top Right)
+const keyLight = new THREE.SpotLight(CONFIG.goldColor, 200);
+keyLight.position.set(10, 10, 10);
+keyLight.angle = Math.PI / 6;
+keyLight.penumbra = 0.5;
+keyLight.castShadow = true;
+keyLight.shadow.mapSize.width = 1024;
+keyLight.shadow.mapSize.height = 1024;
+scene.add(keyLight);
+
+// Rim Light (Cool White - Back Left) - to separate from background
+const rimLight = new THREE.SpotLight(0xffffff, 100);
+rimLight.position.set(-10, 5, -10);
+rimLight.lookAt(0, 0, 0);
+scene.add(rimLight);
+
+// Fill Light (Soft - Bottom)
+const fillLight = new THREE.PointLight(CONFIG.goldColor, 5, 20);
+fillLight.position.set(0, -10, 5);
+scene.add(fillLight);
 
 
-// --- POST PROCESSING ---
+// --- POST PROCESSING (Majestic Glow) ---
 const composer = new EffectComposer(renderer);
+
 const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
 
-// 1. Film Pass (Surveillance Grain - Cleaner than Glitch)
-const filmPass = new FilmPass(0.35, 0.025, 648, false);
-composer.addPass(filmPass);
+// Unreal Bloom for that "Holy" look
+const bloomPass = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    CONFIG.bloomStrength,
+    CONFIG.bloomRadius,
+    CONFIG.bloomThreshold
+);
+composer.addPass(bloomPass);
 
-// 2. Custom "Surveillance" Shader (Subtle chromatic aberration, night vision tint)
-const SurveillanceShader = {
-    uniforms: {
-        "tDiffuse": { value: null },
-        "time": { value: 0.0 },
-        "resolution": { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
-    },
-    vertexShader: `
-        varying vec2 vUv;
-        void main() {
-            vUv = uv;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-    `,
-    fragmentShader: `
-        uniform sampler2D tDiffuse;
-        uniform float time;
-        uniform vec2 resolution;
-        varying vec2 vUv;
 
-        void main() {
-            vec2 uv = vUv;
+// --- INTERACTION ---
+let mouseX = 0;
+let mouseY = 0;
 
-            // Subtle Lens Distortion
-            vec2 dist = uv - 0.5;
-            float r2 = dot(dist, dist);
-            uv += dist * (r2 * 0.05); // Mild fisheye
-
-            // Chromatic Aberration (Static)
-            float shift = 0.002;
-            vec4 r = texture2D(tDiffuse, uv + vec2(shift, 0.0));
-            vec4 g = texture2D(tDiffuse, uv);
-            vec4 b = texture2D(tDiffuse, uv - vec2(shift, 0.0));
-
-            vec3 color = vec3(r.r, g.g, b.b);
-
-            // Night Vision Green Tint
-            color *= vec3(0.8, 1.1, 0.9);
-
-            // Scanlines
-            float scan = sin(uv.y * 800.0 + time * 2.0) * 0.05;
-            color -= scan;
-
-            // Vignette
-            float vig = 1.0 - smoothstep(0.4, 1.2, length(vUv - 0.5) * 1.5);
-            color *= vig;
-
-            gl_FragColor = vec4(color, 1.0);
-        }
-    `
-};
-
-const surveillancePass = new ShaderPass(SurveillanceShader);
-composer.addPass(surveillancePass);
+window.addEventListener('mousemove', (e) => {
+    mouseX = (e.clientX - window.innerWidth / 2) * 0.001;
+    mouseY = (e.clientY - window.innerHeight / 2) * 0.001;
+});
 
 
 // --- ANIMATION LOOP ---
@@ -164,212 +154,88 @@ const clock = new THREE.Clock();
 
 function animate() {
     requestAnimationFrame(animate);
-    const elapsedTime = clock.getElapsedTime();
+    const time = clock.getElapsedTime();
 
-    // 1. Rotate the Whole Group
-    coreGroup.rotation.y = elapsedTime * 0.1;
+    // Rotate the Group slowly
+    orbGroup.rotation.y = time * 0.05;
 
-    // 2. Animate Rings (Opposite directions for complexity)
-    innerRing.rotation.x = elapsedTime * 0.5;
-    innerRing.rotation.y = elapsedTime * 0.2;
+    // Rotate Rings independently
+    r1.rotation.z = time * 0.1;
+    r2.rotation.z = time * 0.15;
+    r3.rotation.z = time * 0.08;
 
-    outerRing.rotation.x = -elapsedTime * 0.3;
-    outerRing.rotation.z = elapsedTime * 0.1;
+    // Gentle floating
+    orbGroup.position.y = Math.sin(time * 0.5) * 0.2;
 
-    // 3. Pulse Core
-    const pulse = 1.0 + Math.sin(elapsedTime * 2.0) * 0.05;
-    centralCore.scale.set(pulse, pulse, pulse);
+    // Mouse Interaction (Parallax)
+    camera.position.x += (mouseX * 5 - camera.position.x) * 0.05;
+    camera.position.y += (-mouseY * 5 - camera.position.y) * 0.05;
+    camera.lookAt(scene.position);
 
-    // 4. Animate Satellites
-    satellites.forEach(sat => {
-        sat.userData.angle += sat.userData.speed * 0.02;
-        sat.position.x = Math.cos(sat.userData.angle) * sat.userData.radius;
-        sat.position.z = Math.sin(sat.userData.angle) * sat.userData.radius;
-        sat.rotation.x += 0.05;
-        sat.rotation.y += 0.05;
-    });
-
-    // Update Post Processing
-    surveillancePass.uniforms.time.value = elapsedTime;
+    // Update Reflections
+    orb.visible = false; // Hide sphere so it doesn't reflect itself awkwardly
+    cubeCamera.update(renderer, scene);
+    orb.visible = true;
 
     composer.render();
 }
 
-// Resize
+
+// --- UI MANAGER (Modal Logic) ---
+
+class ImperialUI {
+    constructor() {
+        this.overlay = document.getElementById('modal-overlay');
+        this.modals = document.querySelectorAll('.proclamation-card');
+        this.buttons = document.querySelectorAll('.nav-btn');
+        this.closeButtons = document.querySelectorAll('.close-btn');
+
+        this.init();
+    }
+
+    init() {
+        // Open Modal
+        this.buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-target');
+                this.openModal(targetId);
+            });
+        });
+
+        // Close Modal
+        this.closeButtons.forEach(btn => {
+            btn.addEventListener('click', () => this.closeAll());
+        });
+
+        // Click Overlay to Close
+        this.overlay.addEventListener('click', () => this.closeAll());
+    }
+
+    openModal(id) {
+        // Close any open ones first
+        this.modals.forEach(m => m.classList.add('hidden'));
+
+        const modal = document.getElementById(id);
+        if (modal) {
+            this.overlay.classList.remove('hidden');
+            modal.classList.remove('hidden');
+        }
+    }
+
+    closeAll() {
+        this.overlay.classList.add('hidden');
+        this.modals.forEach(m => m.classList.add('hidden'));
+    }
+}
+
+new ImperialUI();
+
+// Resize Handler
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    surveillancePass.uniforms.resolution.value.set(window.innerWidth, window.innerHeight);
     composer.setSize(window.innerWidth, window.innerHeight);
 });
-
-
-// --- UI LOGIC (Text Scramble & Windows) ---
-// Note: We need to match the new Data Attributes from index.html
-
-// Scramble Effect
-class TextScramble {
-    constructor(el) {
-        this.el = el;
-        this.chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        this.originalText = el.innerText;
-        this.frameRequest = null;
-        this.frame = 0;
-        this.queue = [];
-        this.update = this.update.bind(this);
-
-        el.addEventListener('mouseenter', () => {
-            this.setText(el.getAttribute('data-original') || this.originalText);
-        });
-    }
-
-    setText(newText) {
-        const oldText = this.el.innerText;
-        const length = Math.max(oldText.length, newText.length);
-        const promise = new Promise((resolve) => this.resolve = resolve);
-
-        this.queue = [];
-        for (let i = 0; i < length; i++) {
-            const from = oldText[i] || '';
-            const to = newText[i] || '';
-            const start = Math.floor(Math.random() * 20); // Faster scramble
-            const end = start + Math.floor(Math.random() * 20);
-            this.queue.push({ from, to, start, end });
-        }
-
-        cancelAnimationFrame(this.frameRequest);
-        this.frame = 0;
-        this.update();
-        return promise;
-    }
-
-    update() {
-        let output = '';
-        let complete = 0;
-
-        for (let i = 0, n = this.queue.length; i < n; i++) {
-            let { from, to, start, end, char } = this.queue[i];
-
-            if (this.frame >= end) {
-                complete++;
-                output += to;
-            } else if (this.frame >= start) {
-                if (!char || Math.random() < 0.28) {
-                    char = this.randomChar();
-                    this.queue[i].char = char;
-                }
-                output += `<span class="dud">${char}</span>`;
-            } else {
-                output += from;
-            }
-        }
-
-        this.el.innerHTML = output;
-
-        if (complete === this.queue.length) {
-            this.resolve();
-        } else {
-            this.frameRequest = requestAnimationFrame(this.update);
-            this.frame++;
-        }
-    }
-
-    randomChar() {
-        return this.chars[Math.floor(Math.random() * this.chars.length)];
-    }
-}
-
-document.querySelectorAll('.nav-item').forEach(el => new TextScramble(el));
-const title = document.querySelector('h1.glitch-text');
-if(title) {
-    const fx = new TextScramble(title);
-    setTimeout(() => fx.setText("SAMRAAT REVANTH"), 1000);
-}
-
-
-// Window Manager
-class WindowManager {
-    constructor() {
-        this.zIndex = 100;
-
-        // Setup Close Buttons
-        document.querySelectorAll('.close-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const win = e.target.closest('.hacker-window');
-                this.closeWindow(win);
-            });
-        });
-
-        // Setup Dragging
-        document.querySelectorAll('.hacker-window').forEach(win => {
-            const header = win.querySelector('.window-header');
-            header.addEventListener('mousedown', (e) => this.startDrag(e, win));
-            win.addEventListener('mousedown', () => win.style.zIndex = ++this.zIndex);
-        });
-
-        // Setup Nav Links (Using data-target)
-        document.querySelectorAll('.nav-item').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetId = link.getAttribute('data-target');
-                if(targetId) this.openWindow(targetId);
-            });
-        });
-    }
-
-    openWindow(id) {
-        const win = document.getElementById(id);
-        if(win) {
-            // Close others if we want single-window focus (optional, but cleaner)
-            // document.querySelectorAll('.hacker-window').forEach(w => w.classList.remove('visible'));
-
-            win.classList.remove('hidden');
-            requestAnimationFrame(() => {
-                win.classList.add('visible');
-                win.style.zIndex = ++this.zIndex;
-            });
-        }
-    }
-
-    closeWindow(win) {
-        win.classList.remove('visible');
-        setTimeout(() => win.classList.add('hidden'), 300);
-    }
-
-    startDrag(e, win) {
-        e.preventDefault();
-        win.classList.add('dragging');
-        win.style.zIndex = ++this.zIndex;
-
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const rect = win.getBoundingClientRect();
-        const startLeft = rect.left;
-        const startTop = rect.top;
-
-        win.style.transform = 'none'; // Disable translate centering during drag
-        win.style.left = startLeft + 'px';
-        win.style.top = startTop + 'px';
-
-        const onMouseMove = (moveEvent) => {
-            const dx = moveEvent.clientX - startX;
-            const dy = moveEvent.clientY - startY;
-            win.style.left = (startLeft + dx) + 'px';
-            win.style.top = (startTop + dy) + 'px';
-        };
-
-        const onMouseUp = () => {
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-            win.classList.remove('dragging');
-        };
-
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-    }
-}
-
-new WindowManager();
 
 animate();
