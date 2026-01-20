@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Revanth Nemtoor | Nebula Core</title>
+    <title>Revanth Nemtoor | Zero-G Data Lab</title>
     <meta name="description" content="Visual Engineer & Creative Developer.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,16 +17,9 @@
 <body>
     <div id="canvas-container"></div>
 
-    <div class="overlay">
-        <div class="content-wrapper">
-            <h1 class="hero-title">REVANTH NEMTOOR</h1>
-            <div class="separator"></div>
-            <p class="hero-subtitle">Visual Engineer <span>&times;</span> Creative Developer</p>
-            <button class="explore-btn">Enter System</button>
-        </div>
-        <div class="footer">
-            <p>EST. 2026 &bull; GALACTIC SECTOR</p>
-        </div>
+    <!-- Instruction Label (Minimal) -->
+    <div id="ui-layer">
+        <div class="instruction">DRAG DATA INTO THE CORE</div>
     </div>
 
     <!-- Import map for module resolution with addons -->
@@ -34,7 +27,8 @@
         {
             "imports": {
                 "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+                "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js"
             }
         }
     </script>
