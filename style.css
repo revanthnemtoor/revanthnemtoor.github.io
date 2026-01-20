@@ -1,9 +1,12 @@
 :root {
-    --bg-color: #000000;
-    --text-color: #ffffff;
-    --gold: #FFD700;
-    --font-heading: 'Cinzel', serif;
-    --font-body: 'Montserrat', sans-serif;
+    --bg-color: #1a1a1a;
+    --concrete: #2a2a2a;
+    --crimson: #d6001c;
+    /* Flag Red */
+    --gold: #ffcc00;
+    /* Star Gold */
+    --text-color: #e0e0e0;
+    --font-stack: 'Oswald', sans-serif;
 }
 
 * {
@@ -14,7 +17,7 @@
 
 body {
     background-color: var(--bg-color);
-    font-family: var(--font-body);
+    font-family: var(--font-stack);
     overflow: hidden;
     color: var(--text-color);
     width: 100vw;
@@ -28,119 +31,120 @@ body {
     width: 100%;
     height: 100%;
     z-index: 1;
-    opacity: 0;
-    /* Fade in handled by JS */
-    transition: opacity 2s ease-in-out;
 }
 
-.overlay {
+.propaganda-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     z-index: 2;
+    padding: 2rem;
+    pointer-events: none;
+}
+
+.border-frame {
+    width: 100%;
+    height: 100%;
+    border: 4px solid var(--gold);
+    position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    pointer-events: none;
-    /* Let text be non-blocking generally */
+    justify-content: space-between;
 }
 
-.content-wrapper {
+.header {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.5);
+    font-size: 1.2rem;
+    letter-spacing: 0.2rem;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.center-piece {
     text-align: center;
-    pointer-events: auto;
-    /* Enable clicks on content */
-    backdrop-filter: blur(2px);
-    /* Subtle blur behind text */
-    padding: 3rem;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    background: radial-gradient(circle, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 70%);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: overlay;
+    /* Blends nicely with fog */
 }
 
-.hero-title {
-    font-family: var(--font-heading);
-    font-size: 4rem;
-    font-weight: 400;
-    letter-spacing: 0.5em;
-    margin-bottom: 2rem;
-    text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
-    background: linear-gradient(to right, #fff, #aaa, #fff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: textShine 8s linear infinite;
-    margin-left: 0.5em;
-    /* Offset for letter spacing */
-}
-
-.separator {
-    width: 100px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #fff, transparent);
-    margin: 0 auto 2rem;
-}
-
-.hero-subtitle {
-    font-size: 0.9rem;
+.monumental-text {
+    font-size: 8vw;
+    line-height: 0.9;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.4em;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 3rem;
-}
-
-.hero-subtitle span {
-    color: var(--gold);
-    margin: 0 0.5rem;
-}
-
-.explore-btn {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    letter-spacing: -0.02em;
     color: #fff;
-    padding: 1rem 3rem;
-    font-family: var(--font-body);
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.3em;
-    cursor: pointer;
-    transition: all 0.4s ease;
-    position: relative;
-    overflow: hidden;
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
 }
 
-.explore-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-    border-color: #fff;
+.red-bar {
+    width: 20%;
+    height: 10px;
+    background-color: var(--crimson);
+    margin: 2rem auto;
+    box-shadow: 0 0 15px var(--crimson);
+}
+
+.slogan {
+    font-size: 2vw;
+    letter-spacing: 0.8em;
+    font-weight: 400;
+    color: var(--gold);
+    text-transform: uppercase;
 }
 
 .footer {
-    position: absolute;
-    bottom: 3rem;
-    font-size: 0.7rem;
-    letter-spacing: 0.3em;
-    opacity: 0.5;
+    text-align: center;
+    padding-bottom: 3rem;
+    pointer-events: auto;
 }
 
-@keyframes textShine {
-    0% {
-        background-position: 0% 50%;
-    }
+.obey-btn {
+    background-color: var(--crimson);
+    color: #fff;
+    border: none;
+    padding: 1.5rem 4rem;
+    font-family: var(--font-stack);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(214, 0, 28, 0.4);
+    transition: transform 0.2s, background-color 0.2s;
+    outline: 2px solid transparent;
+}
 
-    100% {
-        background-position: 200% 50%;
-    }
+.obey-btn:hover {
+    transform: scale(1.05);
+    background-color: #ff0022;
+    outline: 2px solid var(--gold);
 }
 
 @media (max-width: 768px) {
-    .hero-title {
-        font-size: 2rem;
-        letter-spacing: 0.3em;
+    .monumental-text {
+        font-size: 15vw;
     }
 
-    .content-wrapper {
-        padding: 1.5rem;
-        width: 90%;
+    .slogan {
+        font-size: 4vw;
+        letter-spacing: 0.4em;
+    }
+
+    .border-frame {
+        border-width: 2px;
+    }
+
+    .obey-btn {
+        padding: 1rem 2rem;
+        font-size: 1rem;
     }
 }
