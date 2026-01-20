@@ -4,42 +4,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Revanth Nemtoor | XENON PRIME</title>
-    <meta name="description" content="Visual Engineer & Creative Developer.">
+    <title>Revanth Nemtoor | Digital Architect</title>
+    <meta name="description" content="Physics-based Digital Playground.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div id="canvas-container"></div>
 
-    <!-- Scanning Interface -->
     <div class="ui-layer">
-        <div class="crosshair center"></div>
-        <div class="corner top-left">
-            <span class="label">TARGET SYSTEM</span>
-            <span class="value">XENON - 7b</span>
-        </div>
-        <div class="corner top-right">
-            <span class="label">ATMOSPHERE</span>
-            <span class="value ok">BREATHABLE</span>
-        </div>
-        <div class="corner bottom-left">
-            <span class="label">COORDINATES</span>
-            <span class="value" id="coords">--.-- | --.--</span>
-        </div>
-        <div class="corner bottom-right">
-            <span class="label">STATUS</span>
-            <span class="value blink">SCANNING...</span>
+        <div class="top-left">
+            <h1 class="name">REVANTH NEMTOOR</h1>
+            <p class="role">DIGITAL ARCHITECT</p>
         </div>
 
-        <div class="main-info">
-            <h1 class="glitch-text" data-text="REVANTH NEMTOOR">REVANTH NEMTOOR</h1>
-            <div class="scan-line"></div>
-            <p class="role">PLANETARY ARCHITECT</p>
-            <button class="land-btn">INITIATE LANDING</button>
+        <div class="bottom-right">
+            <div class="instruction">CLICK & DRAG TO INTERACT</div>
+            <div class="tech-stack">THREE.JS / CANNON.JS</div>
         </div>
     </div>
 
@@ -48,7 +32,8 @@
         {
             "imports": {
                 "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+                "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js"
             }
         }
     </script>
