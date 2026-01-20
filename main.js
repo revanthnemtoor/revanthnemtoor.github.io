@@ -148,6 +148,24 @@ const artifactGeometry = new THREE.TorusKnotGeometry(4, 1.2, 128, 32);
 const artifact = new THREE.Mesh(artifactGeometry, artifactMaterial);
 scene.add(artifact);
 
+// --- CYBER-HEART (Inner Core) ---
+const heartGeometry = new THREE.IcosahedronGeometry(2, 2);
+const heartMaterial = new THREE.MeshStandardMaterial({
+    color: 0xff0000,
+    emissive: 0xff0000,
+    emissiveIntensity: 5.0,
+    roughness: 0.2,
+    metalness: 1.0,
+    wireframe: false
+});
+const heart = new THREE.Mesh(heartGeometry, heartMaterial);
+artifact.add(heart);
+
+// Inner Light
+const heartLight = new THREE.PointLight(0xff0000, 10, 20);
+heart.add(heartLight);
+
+
 // Background Grid (Retro Style)
 const gridHelper = new THREE.GridHelper(100, 50, 0x111111, 0x111111);
 gridHelper.position.y = -10;
@@ -265,6 +283,10 @@ function animate() {
     artifact.rotation.x = elapsedTime * 0.2;
     artifact.rotation.y = elapsedTime * 0.5 + mouse.x * 0.5;
 
+    // Pulse Heart
+    const heartbeat = 1.0 + Math.pow(Math.sin(elapsedTime * 4.0), 63.0) * 0.3; // Sharp beat
+    heart.scale.set(heartbeat, heartbeat, heartbeat);
+
     // Update Post Processing
     glitchPass.uniforms.time.value = elapsedTime;
     glitchPass.uniforms.uMouseSpeed.value = Math.min(mouseVelocity, 1.0); // Cap at 1
@@ -367,5 +389,102 @@ if(title) {
     // Auto trigger once on load
     setTimeout(() => fx.setText("REVANTH NEMTOOR"), 1000);
 }
+
+// --- WINDOW MANAGER LOGIC ---
+class WindowManager {
+    constructor() {
+        this.windows = document.querySelectorAll('.hacker-window');
+        this.zIndex = 100;
+
+        // Setup Dragging
+        this.windows.forEach(win => {
+            const header = win.querySelector('.window-header');
+            const closeBtn = win.querySelector('.close-btn');
+
+            header.addEventListener('mousedown', (e) => this.startDrag(e, win));
+            closeBtn.addEventListener('click', () => this.closeWindow(win));
+
+            // Bring to front on click
+            win.addEventListener('mousedown', () => {
+                win.style.zIndex = ++this.zIndex;
+            });
+        });
+
+        // Setup Nav Links
+        document.querySelectorAll('.nav-item').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const type = link.getAttribute('data-original');
+                if (type === 'ABOUT_ME') this.openWindow('window-about');
+                if (type === 'CONTACT') this.openWindow('window-contact');
+                if (type === 'PROJECTS') alert('ACCESS DENIED: LEVEL 5 CLEARANCE REQUIRED');
+            });
+        });
+    }
+
+    openWindow(id) {
+        const win = document.getElementById(id);
+        if(win) {
+            win.classList.remove('hidden');
+            // Small delay to allow display:block to apply before transform animation
+            requestAnimationFrame(() => {
+                win.classList.add('visible');
+                win.style.zIndex = ++this.zIndex;
+
+                // Random position offset to feel like a pop-up
+                const offset = (Math.random() - 0.5) * 100;
+                // Only if not already dragged
+                if(!win.hasAttribute('data-dragged')) {
+                   // Center it roughly
+                }
+            });
+        }
+    }
+
+    closeWindow(win) {
+        win.classList.remove('visible');
+        setTimeout(() => win.classList.add('hidden'), 300); // Wait for transition
+    }
+
+    startDrag(e, win) {
+        e.preventDefault();
+
+        win.classList.add('dragging');
+        win.setAttribute('data-dragged', 'true');
+        win.style.zIndex = ++this.zIndex;
+
+        const startX = e.clientX;
+        const startY = e.clientY;
+
+        // Get current computed position
+        const rect = win.getBoundingClientRect();
+        const startLeft = rect.left;
+        const startTop = rect.top;
+
+        // Remove transform centering if it exists
+        win.style.transform = 'none';
+        win.style.left = startLeft + 'px';
+        win.style.top = startTop + 'px';
+
+        const onMouseMove = (moveEvent) => {
+            const dx = moveEvent.clientX - startX;
+            const dy = moveEvent.clientY - startY;
+
+            win.style.left = (startLeft + dx) + 'px';
+            win.style.top = (startTop + dy) + 'px';
+        };
+
+        const onMouseUp = () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            win.classList.remove('dragging');
+        };
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    }
+}
+
+new WindowManager();
 
 animate();
