@@ -1,7 +1,10 @@
 :root {
-    --bg-color: #f0f0f0;
-    --text-color: #1a1a1a;
-    --font-stack: 'Inter', sans-serif;
+    --bg-color: #000c0d;
+    /* Deep Dark Teal */
+    --accent: #00ffaa;
+    /* Neon Spring Green */
+    --text-color: #e0fff8;
+    --font-stack: 'Comfortaa', cursive;
 }
 
 * {
@@ -28,7 +31,7 @@ body {
     z-index: 1;
 }
 
-.ui-layer {
+.bio-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -36,57 +39,81 @@ body {
     height: 100%;
     z-index: 2;
     pointer-events: none;
-    padding: 2rem;
+    padding: 3rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    background: radial-gradient(circle at center, transparent, rgba(0, 12, 13, 0.4));
 }
 
-.top-left {
-    align-self: flex-start;
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: auto;
 }
 
-.name {
-    font-size: 1rem;
+.logo {
+    font-size: 1.2rem;
     font-weight: 700;
-    letter-spacing: -0.02em;
-    text-transform: uppercase;
-    margin-bottom: 0.2rem;
+    letter-spacing: -0.05em;
+    text-shadow: 0 0 10px rgba(0, 255, 170, 0.5);
 }
 
-.role {
-    font-size: 0.8rem;
+nav a {
+    color: var(--text-color);
+    text-decoration: none;
+    margin-left: 2rem;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+nav a:hover {
+    opacity: 1;
+    color: var(--accent);
+    text-shadow: 0 0 15px var(--accent);
+}
+
+.center-message {
+    text-align: left;
+}
+
+.center-message h2 {
+    font-size: 4rem;
     font-weight: 300;
-    color: #666;
-    letter-spacing: 0.05em;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 30px rgba(0, 255, 170, 0.3);
 }
 
-.bottom-right {
-    align-self: flex-end;
-    text-align: right;
+.center-message p {
+    font-size: 1.2rem;
+    opacity: 0.8;
+    letter-spacing: 0.2rem;
 }
 
-.instruction {
+.stats {
+    display: flex;
+    gap: 2rem;
     font-size: 0.8rem;
-    font-weight: 500;
-    margin-bottom: 0.2rem;
-    border: 1px solid #1a1a1a;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    display: inline-block;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(5px);
-}
-
-.tech-stack {
-    font-size: 0.6rem;
-    color: #888;
-    margin-top: 0.5rem;
+    opacity: 0.5;
     font-family: monospace;
 }
 
 @media (max-width: 768px) {
-    .instruction {
-        display: none;
+    .center-message h2 {
+        font-size: 2.5rem;
+    }
+
+    header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    nav a {
+        margin-left: 0;
+        margin-right: 1rem;
     }
 }
