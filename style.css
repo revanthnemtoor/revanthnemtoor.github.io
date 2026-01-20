@@ -1,149 +1,173 @@
 :root {
-    --bg-color: #050510;
-    --text-color: #e0e0e0;
-    --accent-color: #6c5ce7;
-    --accent-glow: rgba(108, 92, 231, 0.4);
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --font-main: 'Outfit', sans-serif;
+    --bg-color: #000000;
+    --text-color: #ffffff;
+    --accent: #00f3ff;
+    --secondary: #bc13fe;
+    --font: 'Outfit', sans-serif;
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    cursor: none;
+    /* Custom cursor or hide for immersion */
 }
 
 body {
     background-color: var(--bg-color);
-    color: var(--text-color);
-    font-family: var(--font-main);
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    font-family: var(--font);
     overflow: hidden;
-    position: relative;
-    /* Needed for absolute positioning of canvas */
+    color: var(--text-color);
 }
 
-#particles {
+#canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    text-align: center;
+    pointer-events: none;
+    /* Let clicks pass through to 3D scene */
+    mix-blend-mode: difference;
+}
+
+h1.glitch {
+    font-size: 5vw;
+    font-weight: 700;
+    letter-spacing: 0.5em;
+    position: relative;
+    text-shadow: 0 0 20px var(--accent);
+    margin-bottom: 1rem;
+}
+
+/* Glitch effect */
+h1.glitch::before,
+h1.glitch::after {
+    content: attr(data-text);
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 0;
-    background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #050510 100%);
-    /* Deep space gradient */
 }
 
-.container {
-    padding: 2rem;
-    width: 100%;
-    max-width: 600px;
-    animation: fadeIn 1.5s ease-out;
-    position: relative;
-    z-index: 1;
-    /* Ensure content is above particles */
+h1.glitch::before {
+    left: 2px;
+    text-shadow: -1px 0 #ff00c1;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim 5s infinite linear alternate-reverse;
 }
 
-.glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    padding: 4rem 2rem;
-    text-align: center;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.glass-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 40px 0 rgba(108, 92, 231, 0.15);
-    border-color: rgba(108, 92, 231, 0.3);
-}
-
-h1 {
-    font-size: 3rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, #fff 0%, #a5a5a5 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    letter-spacing: -0.05em;
+h1.glitch::after {
+    left: -2px;
+    text-shadow: -1px 0 #00fff9;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim2 5s infinite linear alternate-reverse;
 }
 
 .subtitle {
-    font-size: 1.25rem;
-    color: #a0a0b0;
-    margin-bottom: 2rem;
-    font-weight: 300;
+    font-size: 1.2rem;
+    letter-spacing: 0.3em;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 3rem;
+    text-transform: uppercase;
 }
 
-.status-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: rgba(108, 92, 231, 0.1);
-    border: 1px solid rgba(108, 92, 231, 0.2);
-    padding: 0.5rem 1rem;
-    border-radius: 50px;
-    font-size: 0.875rem;
-    color: #bbb;
-    margin-bottom: 2rem;
+.loader {
+    width: 200px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0 auto 1.5rem;
+    position: relative;
+    overflow: hidden;
 }
 
-.dot {
-    width: 8px;
-    height: 8px;
-    background-color: var(--accent-color);
-    border-radius: 50%;
-    box-shadow: 0 0 10px var(--accent-glow);
-    animation: pulse 2s infinite;
+.bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+    animation: load 2s infinite ease-in-out;
 }
 
-.description {
-    line-height: 1.6;
-    color: #888;
-    max-width: 400px;
-    margin: 0 auto;
+.status {
+    font-size: 0.8rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    animation: blink 1s infinite;
 }
 
-@keyframes pulse {
+@keyframes load {
     0% {
-        box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.4);
-    }
-
-    70% {
-        box-shadow: 0 0 0 6px rgba(108, 92, 231, 0);
+        left: -50%;
     }
 
     100% {
-        box-shadow: 0 0 0 0 rgba(108, 92, 231, 0);
+        left: 100%;
     }
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
+@keyframes blink {
 
-    to {
+    0%,
+    100% {
         opacity: 1;
-        transform: translateY(0);
+    }
+
+    50% {
+        opacity: 0.5;
     }
 }
 
-@media (max-width: 480px) {
-    h1 {
-        font-size: 2.25rem;
+@keyframes glitch-anim {
+    0% {
+        clip: rect(14px, 9999px, 86px, 0);
     }
 
-    .glass-card {
-        padding: 3rem 1.5rem;
+    10% {
+        clip: rect(83px, 9999px, 19px, 0);
+    }
+
+    100% {
+        clip: rect(22px, 9999px, 12px, 0);
+    }
+}
+
+@keyframes glitch-anim2 {
+    0% {
+        clip: rect(61px, 9999px, 52px, 0);
+    }
+
+    10% {
+        clip: rect(10px, 9999px, 20px, 0);
+    }
+
+    100% {
+        clip: rect(2px, 9999px, 80px, 0);
+    }
+}
+
+@media (max-width: 768px) {
+    h1.glitch {
+        font-size: 2rem;
+        letter-spacing: 0.2em;
+    }
+
+    .subtitle {
+        font-size: 0.9rem;
     }
 }
