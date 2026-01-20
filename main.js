@@ -1,96 +1,143 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
 // Scene Setup
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x000000, 0.03); // Deep fog for infinity feel
+scene.fog = new THREE.FogExp2(0x000000, 0.001); // Subtle deep fog
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.z = 20;
+camera.position.y = 5;
+camera.lookAt(0, 0, 0);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: "high-performance" }); // Antialias off for post-processing performance
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.toneMapping = THREE.ReinhardToneMapping;
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.CineonToneMapping;
+renderer.toneMappingExposure = 1.5;
 document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-// Controls
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
-controls.autoRotate = true;
-controls.autoRotateSpeed = 0.5;
-controls.enableZoom = false; // Keep the user in the "zone"
+// Fade In
+setTimeout(() => {
+    document.getElementById('canvas-container').style.opacity = '1';
+}, 100);
 
-// Objects
-const geometry = new THREE.IcosahedronGeometry(10, 2);
-const material = new THREE.MeshStandardMaterial({
-    color: 0x000000,
-    wireframe: true,
-    roughness: 0.1,
-    metalness: 1.0,
-    emissive: 0x00f3ff,
-    emissiveIntensity: 0.2
-});
+// --- GEOMETRY: The Nebula Clouds ---
+const particleCount = 1500;
+const geometry = new THREE.BufferGeometry();
+const positions = new Float32Array(particleCount * 3);
+const colors = new Float32Array(particleCount * 3);
+const sizes = new Float32Array(particleCount);
 
-const mainSphere = new THREE.Mesh(geometry, material);
-scene.add(mainSphere);
+const colorPalette = [
+    new THREE.Color('#ff0055'), // Pink/Red
+    new THREE.Color('#0055ff'), // Blue
+    new THREE.Color('#00ffaa'), // Cyan/Green
+    new THREE.Color('#ffffff')  // White stars
+];
 
-// Floating Particles
-const particlesGeometry = new THREE.BufferGeometry();
-const particlesCount = 2000;
-const posArray = new Float32Array(particlesCount * 3);
+for (let i = 0; i < particleCount; i++) {
+    // Spiral distribution
+    const radius = Math.random() * 30 + 5;
+    const spinAngle = radius * 0.5;
+    const branchAngle = (i % 3) * ((Math.PI * 2) / 3);
 
-for (let i = 0; i < particlesCount * 3; i++) {
-    posArray[i] = (Math.random() - 0.5) * 100; // Spread heavily
+    const randomX = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 3;
+    const randomY = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 3;
+    const randomZ = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 3;
+
+    positions[i * 3] = Math.cos(branchAngle + spinAngle) * radius + randomX;
+    positions[i * 3 + 1] = randomY * 2; // Flattened galaxy shape
+    positions[i * 3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ;
+
+    // Mixed colors based on radius
+    const mixedColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+    colors[i * 3] = mixedColor.r;
+    colors[i * 3 + 1] = mixedColor.g;
+    colors[i * 3 + 2] = mixedColor.b;
+
+    sizes[i] = Math.random() * 2;
 }
 
-particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-const particlesMaterial = new THREE.PointsMaterial({
-    size: 0.05,
-    color: 0xbc13fe,
-    transparent: true,
-    opacity: 0.8,
+geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+// Custom Shader Material for glowy dots
+const shaderMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+        time: { value: 0 },
+        uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
+    },
+    vertexShader: `
+        uniform float time;
+        uniform float uPixelRatio;
+        attribute float size;
+        varying vec3 vColor;
+        
+        void main() {
+            vColor = color;
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            
+            // Orbiting movement
+            float angle = time * 0.1 * (1.0 / length(position.xz));
+            float newX = position.x * cos(angle) - position.z * sin(angle);
+            float newZ = position.x * sin(angle) + position.z * cos(angle);
+            
+            vec4 newPos = modelViewMatrix * vec4(newX, position.y, newZ, 1.0);
+            
+            gl_PointSize = size * uPixelRatio * (50.0 / -newPos.z);
+            gl_Position = projectionMatrix * newPos; // Use simplifiedorbit for visuals
+        }
+    `,
+    fragmentShader: `
+        varying vec3 vColor;
+        
+        void main() {
+            // Circular particle
+            float distanceToCenter = distance(gl_PointCoord, vec2(0.5));
+            if (distanceToCenter > 0.5) discard;
+            
+            // Soft glow gradient
+            float strength = 0.05 / (distanceToCenter - 0.5); // Inverse glow? No, standard halo
+            strength = 1.0 - (distanceToCenter * 2.0);
+            strength = pow(strength, 3.0);
+
+            gl_FragColor = vec4(vColor, strength);
+        }
+    `,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    vertexColors: true,
+    transparent: true
 });
 
-const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-scene.add(particlesMesh);
-
-// Inner Core
-const coreGeometry = new THREE.OctahedronGeometry(4, 0);
-const coreMaterial = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
-    wireframe: true,
-    transparent: true,
-    opacity: 0.1
-});
-const core = new THREE.Mesh(coreGeometry, coreMaterial);
-scene.add(core);
+const points = new THREE.Points(geometry, shaderMaterial);
+scene.add(points);
 
 
-// Lighting
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-scene.add(ambientLight);
+// --- POST PROCESSING ---
+const renderScene = new RenderPass(scene, camera);
 
-const pointLight = new THREE.PointLight(0x00f3ff, 200, 100);
-pointLight.position.set(10, 10, 10);
-scene.add(pointLight);
+// Resolution, Strength, Radius, Threshold
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+bloomPass.strength = 2.0;
+bloomPass.radius = 0.5;
+bloomPass.threshold = 0; // Bloom everything for maximum glow
 
-const pointLight2 = new THREE.PointLight(0xbc13fe, 200, 100);
-pointLight2.position.set(-10, -10, -10);
-scene.add(pointLight2);
+const composer = new EffectComposer(renderer);
+composer.addPass(renderScene);
+composer.addPass(bloomPass);
 
 
-// Interactive Mouse Effect
-const raycaster = new THREE.Raycaster();
+// Interaction
 const mouse = new THREE.Vector2();
-
-function onMouseMove(event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-}
-window.addEventListener('mousemove', onMouseMove, false);
-
+window.addEventListener('mousemove', (e) => {
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+});
 
 // Animation Loop
 const clock = new THREE.Clock();
@@ -99,39 +146,29 @@ function animate() {
     requestAnimationFrame(animate);
     const elapsedTime = clock.getElapsedTime();
 
-    // Rotate objects
-    mainSphere.rotation.y += 0.002;
-    mainSphere.rotation.x += 0.001;
+    // Update Uniforms
+    shaderMaterial.uniforms.time.value = elapsedTime;
 
-    core.rotation.y -= 0.004;
-    core.rotation.z += 0.002;
+    // Global rotation based on mouse
+    scene.rotation.y = elapsedTime * 0.05 + (mouse.x * 0.1);
+    scene.rotation.x = (mouse.y * 0.05);
 
-    // Wave effect for particles
-    particlesMesh.rotation.y = -elapsedTime * 0.05;
-    particlesMesh.rotation.x = elapsedTime * 0.02;
+    // Camera sway
+    camera.position.x = Math.sin(elapsedTime * 0.2) * 2;
+    camera.lookAt(0, 0, 0);
 
-    // Pulse effect
-    const scale = 1 + Math.sin(elapsedTime * 2) * 0.02;
-    mainSphere.scale.set(scale, scale, scale);
-
-    // Mouse Interaction (Distortion)
-    // Simple look-at or slight pan based on mouse
-    const targetX = mouse.x * 2;
-    const targetY = mouse.y * 2;
-
-    mainSphere.rotation.y += 0.05 * (targetX - mainSphere.rotation.y);
-    mainSphere.rotation.x += 0.05 * (targetY - mainSphere.rotation.x);
-
-    controls.update();
-    renderer.render(scene, camera);
+    // Render via Composer (not renderer)
+    composer.render();
 }
 
-// Resize Handling
+// Resize
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    composer.setSize(window.innerWidth, window.innerHeight);
+    shaderMaterial.uniforms.uPixelRatio.value = Math.min(window.devicePixelRatio, 2);
 });
 
 animate();
