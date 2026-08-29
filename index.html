@@ -1,51 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Revanth Nemtoor | Digital Ecology</title>
-    <meta name="description" content="Generative Nature & Code.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;700&display=swap" rel="stylesheet">
+    <title>revanthnemtoor.me | Under Construction</title>
+    <meta name="description" content="revanthnemtoor.me is currently under construction. Please check back soon!">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <div id="canvas-container"></div>
-
-    <div class="bio-overlay">
-        <header>
-            <h1 class="logo">REVANTH NEMTOOR</h1>
-            <nav>
-                <a href="#">PROJECTS</a>
-                <a href="#">ABOUT</a>
-                <a href="#">CONTACT</a>
-            </nav>
-        </header>
-
-        <div class="center-message">
-            <h2>THE LIVING BIOME</h2>
-            <p>Digital Ecosystems • Generative Growth</p>
+    <div class="background-animation"></div>
+    <main class="container">
+        <div class="glass-card">
+            <div class="icon-container">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="leaf-icon">
+                    <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
+                    <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
+                </svg>
+            </div>
+            <h1 class="title">revanthnemtoor.me</h1>
+            <p class="subtitle">Something magical is sprouting here.</p>
+            
+            <div class="progress-container">
+                <div class="progress-bar"></div>
+            </div>
+            
+            <p class="status" id="status-text">Planting seeds...</p>
         </div>
-
-        <div class="stats">
-            <span>ENTITIES: 50,000+</span>
-            <span>STATUS: THRIVING</span>
-        </div>
-    </div>
-
-    <!-- Import map -->
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
-    </script>
-    <script type="module" src="main.js"></script>
+    </main>
+    <script src="script.js"></script>
 </body>
-
 </html>
