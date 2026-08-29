@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revanth Nemtoor | Cyber Void</title>
+    <meta name="description" content="Immersive 3D portfolio of Revanth Nemtoor.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="canvas-container"></div>
+
+    <div class="overlay">
+        <h1 class="glitch" data-text="REVANTH NEMTOOR">REVANTH NEMTOOR</h1>
+        <p class="subtitle">ARCHITECTING THE VIRTUAL</p>
+        <div class="loader">
+            <div class="bar"></div>
+        </div>
+        <p class="status">SYSTEM INITIALIZED</p>
+    </div>
+
+    <!-- Import map for simple module resolution -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="main.js"></script>
+</body>
+
+</html>
